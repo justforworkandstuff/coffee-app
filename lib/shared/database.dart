@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffeeproject/models/order.dart';
 import 'package:coffeeproject/models/user.dart';
+import 'package:uuid/uuid.dart';
 
 class DatabaseService {
   final String uid;
@@ -12,7 +13,7 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('User');
   final CollectionReference orderList =
       FirebaseFirestore.instance.collection('Orders');
-  
+
   //register new set of user
   Future newUserData(double balance, String address, int orders,
       String userName, int phoneNo, String image) async {
@@ -23,6 +24,18 @@ class DatabaseService {
       'userName': userName,
       'phoneNo': phoneNo,
       'image': image,
+      'orderID': uid + 'ORDERID',
+    }).then((value) async {
+      String orderID = uid + 'ORDERID';
+      await orderList.doc(orderID).set({
+        'productName': 'productName',
+        'productPrice': 0.00,
+        'date': 'date',
+        'time': 'time',
+        'address': 'address',
+        'owner': 'owner',
+        'orders': 'orders',
+      });
     });
   }
 
@@ -49,13 +62,14 @@ class DatabaseService {
   //reading user Lists
   Future readUsers() async {
     // return userList.doc(uid).snapshots().listen((event) => print(event.data()));
-    return userList.doc(uid).get();
+    return await userList.doc(uid).get();
   }
 
   //add user image
-  Future userImageAdd(String image) async
-  {
-    return userList.doc(uid).update({'image': image,});
+  Future userImageAdd(String image) async {
+    return await userList.doc(uid).update({
+      'image': image,
+    });
   }
 
   //get stream listener for changes in user collection
@@ -73,23 +87,23 @@ class DatabaseService {
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   /// Orders
   ////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  var uuid = Uuid();
 
   //buy items
   Future placeOrder(String productName, double productPrice, String date,
       String time, String address, String owner) async {
-        return await orderList.add({
-          'productName': productName,
-          'productPrice': productPrice,
-          'date': date,
-          'time': time,
-          'address': address,
-          'owner': owner,
-        });
-      }
+        String orderID = uid + 'ORDERID';
+    return await orderList.doc(orderID).update({
+      'orders.${uuid.v4()}': FieldValue.arrayUnion(['Product: $productName', 'Price: $productPrice']),
+      // 'orders': FieldValue.arrayUnion(['Product: $productName', 'Price: $productPrice']),
+    });
+  }
 
   //reading order Lists
+  // this reads ALL orders from Order collection, needs to be changed.
   Future readOrders() async {
-    return orderList.doc().get();
+    return await orderList.doc().get();
   }
 
   //stream listener for changes in orders collection

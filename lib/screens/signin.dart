@@ -246,6 +246,7 @@ class _SignInState extends State<SignIn> {
                           visible: toggleRegister,
                           child: TextFormField(
                             controller: _phoneController,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             decoration: textFormFieldDecoration.copyWith(
                                 hintText: 'Register your phone number.'),
                             validator: (val) => val!.isEmpty
@@ -339,7 +340,6 @@ class _SignInState extends State<SignIn> {
                           visible: toggleSignIn,
                           child: GestureDetector(
                             onTap: () {
-                              // Navigator.pushNamed(context, '/register');
                               showRegister();
                               clearFields();
                             },
