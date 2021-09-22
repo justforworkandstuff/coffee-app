@@ -21,7 +21,8 @@ class _TestScreenState extends State<TestScreen> {
   String time = '13:30';
   String address = '101010, bbbbbb';
   String owner = 'ownerName';
-  
+  var test2;
+
   //reading profile
   @override
   void initState() {
@@ -31,10 +32,28 @@ class _TestScreenState extends State<TestScreen> {
       setState(() {
         owner = data!['userName'];
         balance = data!['balance'];
-        newBalanceText = 'New Balance: ${data!['balance']}';
-        print('read done');
+
+        //newBalanceText = 'New Balance: ${data!['balance']}';
+        print('read users done');
       });
     });
+    _auth.readFififi().then((value) {
+      data = value.data();
+      test2 = data!['orders'];
+      setState(() {
+        // List.from(value.data!['orders']).forEach((element) {
+        //   data = value.data();
+        //   test.add(data!);
+        // });
+        //secTestArray = testArray;
+        //print(secTestArray);
+        //test2 = data!['orders'];
+        //test2 = data!['orders'].toString();
+        // test2 = jsonEncode(test!['37af6b56-b1e6-4cfd-9087-05e8503deef5']);
+        //print(test2);
+      });
+    });
+    print('read orders done');
   }
 
   @override
@@ -46,16 +65,17 @@ class _TestScreenState extends State<TestScreen> {
           child: Form(
             key: _testKey,
             child: Column(
-              children: [Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(15.0),
-                      child: Column(
-                        children: [
-                          Text(productName),
-                          Text('RM $productPrice'),
-                        ],
-                      ),
+              children: [
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Column(
+                      children: [
+                        Text(productName),
+                        Text('RM $productPrice'),
+                      ],
                     ),
+                  ),
                 ),
                 SizedBox(height: 15.0),
                 // TextFormField(
@@ -70,7 +90,8 @@ class _TestScreenState extends State<TestScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_testKey.currentState!.validate()) {
-                      await _auth.makeOrder(productName, productPrice, date, time, address, owner);
+                      await _auth.makeOrder(productName, productPrice, date,
+                          time, address, owner);
                       await _auth.userBalanceSubtract(balance, productPrice);
                       print('buy done');
                     }
@@ -78,18 +99,29 @@ class _TestScreenState extends State<TestScreen> {
                   child: Text('Buy'),
                 ),
                 ElevatedButton(
-                  child: Text('Show balance'),
+                  child: Text('Delete'),
                   onPressed: () async {
-                    await _auth.userItemRead().then((value) {
-                      data = value.data();
-                      setState(() {
-                        newBalanceText = 'New Balance: ${data!['balance']}';
-                      });
-                    });
-                    print('read done');
+                    // await _auth.userItemRead().then((value) {
+                    //   data = value.data();
+                    //   setState(() {
+                    //     newBalanceText = 'New Balance: ${data!['balance']}';
+                    //   });
+                    // });
+                    await _auth.deleteFiFi();
+                    print('delete done');
                   },
                 ),
-                Text(newBalanceText),
+                Expanded(
+                  child: ListView.builder(
+                      itemCount: test2.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                            child: ListTile(
+                          title: Text(test2[index]['Product']),
+                          subtitle: Text(test2[index]['Price']),
+                        ));
+                      }),
+                ),
               ],
             ),
           ),
