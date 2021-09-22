@@ -87,16 +87,46 @@ class DatabaseService {
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   /// Orders
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
   var uuid = Uuid();
 
   //buy items
   Future placeOrder(String productName, double productPrice, String date,
       String time, String address, String owner) async {
-        String orderID = uid + 'ORDERID';
-    return await orderList.doc(orderID).update({
-      'orders.${uuid.v4()}': FieldValue.arrayUnion(['Product: $productName', 'Price: $productPrice']),
-      // 'orders': FieldValue.arrayUnion(['Product: $productName', 'Price: $productPrice']),
+    return await orderList.doc(uid + 'ORDERID').update({
+      // '${uuid.v4()}': [{'Product': '$productName', 'Price': '$productPrice'}],
+      // 'orders.${uuid.v4()}': FieldValue.arrayUnion([
+      //   {'Product': '$productName', 'Price': '$productPrice'}
+      //   ]),
+      // 'orders.${uuid.v4()}': ['Product: $productName', 'Price: $productPrice'],
+      // 'orders': [
+      //   {'Product': '$productName', 'Price': '$productPrice', 'Date': DateTime.now()}
+      // ],
+      'orders': FieldValue.arrayUnion([
+        {
+          'Product': '$productName',
+          'Price': '$productPrice',
+          'Date': DateTime.now(),
+        }
+      ]),
+      // '${FieldValue.increment(0)}': [{'Product': '$productName', 'Price': '$productPrice'}],
+    });
+  }
+
+  //read fields
+  Future readFields() async {
+    // DocumentSnapshot doc = await orderList.doc(uid + 'ORDERID').get();
+    // List abcd = doc.data().
+    return await orderList.doc(uid + 'ORDERID').get();
+    // return await orderList.where('id', isEqualTo: uid + 'ORDERID').get().then((value) {
+    //   value.
+    // });
+  }
+
+  //delete fields
+  Future deleteFields() async {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'orders.${uuid.v4}': FieldValue.delete(),
     });
   }
 

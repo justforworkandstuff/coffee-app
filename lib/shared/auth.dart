@@ -157,4 +157,32 @@ class AuthService {
       return null;
     }
   }
+
+  //test read fields
+  Future readFififi() async 
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).readFields();
+    }
+    catch (e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
+  
+  //test delete fields
+  Future deleteFiFi() async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).deleteFields();
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
 }
