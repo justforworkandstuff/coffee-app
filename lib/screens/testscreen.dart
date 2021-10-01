@@ -31,20 +31,20 @@ class _TestScreenState extends State<TestScreen> {
   TextEditingController priceContoller = TextEditingController();
 
   //reading profile
-  @override
-  void initState() {
-    super.initState();
-    setState(() => loading = true);
-    _auth.readFields().then((value) {
-      data = value.data();
-      test2 = data!['orders'];
-      setState(() {
-        test = test2![0]['ID'];
-        loading = false; 
-        print('read orders done');
-      });
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   setState(() => loading = true);
+  //   _auth.readFields().then((value) {
+  //     data = value.data();
+  //     test2 = data!['orders'];
+  //     setState(() {
+  //       test = test2![0]['ID'];
+  //       loading = false; 
+  //       print('read orders done');
+  //     });
+  //   });
+  // }
 
   void clearFields() {
     _testKey.currentState!.reset();
@@ -129,26 +129,26 @@ class _TestScreenState extends State<TestScreen> {
                           ),
                         ],
                       ),
-                      Expanded(
-                        child: ListView.builder(
-                            itemCount: test2.length,
-                            itemBuilder: (context, index) {
-                              return InkWell(
-                                onTap: () async {
-                                  await _auth.deleteFields(test, productName,
-                                      productPrice.toString());
-                                  print('delete done');
-                                },
-                                child: Card(
-                                    child: ListTile(
-                                  title: Text(test2[index]['ID']),
-                                  // title: Text(test2[index]['Product']),
-                                  subtitle: Text('Total Amount : ' +
-                                      test2[index]['Price']),
-                                )),
-                              );
-                            }),
-                      ),
+                      // Expanded(
+                      //   child: ListView.builder(
+                      //       itemCount: test2.length,
+                      //       itemBuilder: (context, index) {
+                      //         return InkWell(
+                      //           onTap: () async {
+                      //             await _auth.deleteFields(test, productName,
+                      //                 productPrice.toString());
+                      //             print('delete done');
+                      //           },
+                      //           child: Card(
+                      //               child: ListTile(
+                      //             title: Text(test2[index]['ID']),
+                      //             // title: Text(test2[index]['Product']),
+                      //             subtitle: Text('Total Amount : ' +
+                      //                 test2[index]['Price']),
+                      //           )),
+                      //         );
+                      //       }),
+                      // ),
                     ],
                   ),
                 ),
