@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:coffeeproject/shared/loading.dart';
 import 'package:path/path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:coffeeproject/shared/auth.dart';
@@ -30,6 +31,7 @@ class _ProfileState extends State<Profile> {
   var sample = AssetImage('assets/useravatar.png');
   FirebaseStorage storage = FirebaseStorage.instance;
   String userCurrentImage = '';
+  bool loading = false;
 
   // reload dialog
   void createAlertDialog(BuildContext context) {
@@ -42,6 +44,7 @@ class _ProfileState extends State<Profile> {
               key: _validationkey,
               child: TextFormField(
                 initialValue: 0.00.toString(),
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}'))],
                 decoration:
                     textFormFieldDecoration.copyWith(hintText: 'Reload Amount'),
                 validator: (val) =>
@@ -60,6 +63,7 @@ class _ProfileState extends State<Profile> {
                       await _auth.userBalanceAdd(balance, reloadAmount);
                       print('reload done');
                       Navigator.pop(context);
+                      manualRefresh();
                     }
                   },
                   child: Text('Confirm')),
@@ -136,9 +140,29 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
+    setState(() => loading = true);
     _auth.userItemRead().then((value) {
       data = value.data();
       setState(() {
+        loading = false;
+        name = '${data!['userName']}';
+        balance = data!['balance'];
+        phoneNo = data!['phoneNo'];
+        address = '${data!['address']}';
+        userCurrentImage = '${data!['image']}';
+        print('update done');
+      });
+    });
+  }
+
+  //manual refresh
+  void manualRefresh() {
+    setState(() => loading = true);
+    setState(() => loading = true);
+    _auth.userItemRead().then((value) {
+      data = value.data();
+      setState(() {
+        loading = false;
         name = '${data!['userName']}';
         balance = data!['balance'];
         phoneNo = data!['phoneNo'];
@@ -151,128 +175,132 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        alignment: Alignment.bottomRight,
-        padding: EdgeInsets.all(25.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: CircleAvatar(
-                    radius: 55.0,
-                    backgroundColor: Colors.green[300],
-                    child: InkWell(
-                      onTap: () {
-                        _showPickedOptionsDialog(context);
-                      },
-                      child: CircleAvatar(
-                        radius: 50.0,
-                        backgroundColor: Colors.white,
-                        child: ClipOval(
-                            child: image != null
-                                ? Image.file(
-                                    image!,
-                                    fit: BoxFit.fill,
-                                  )
-                                : Image.network(
-                                    userCurrentImage,
-                                    fit: BoxFit.fill,
-                                  )),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 25.0),
-                Expanded(
-                  flex: 6,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+    return loading
+        ? Loading()
+        : SingleChildScrollView(
+            child: Container(
+              alignment: Alignment.bottomRight,
+              padding: EdgeInsets.all(25.0),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(flex: 6, child: Text('Name:')),
-                          Text(''),
-                          Expanded(flex: 4, child: Text(name)),
-                        ],
+                      Expanded(
+                        flex: 4,
+                        child: CircleAvatar(
+                          radius: 55.0,
+                          backgroundColor: Colors.green[300],
+                          child: InkWell(
+                            onTap: () {
+                              _showPickedOptionsDialog(context);
+                            },
+                            child: CircleAvatar(
+                              radius: 50.0,
+                              backgroundColor: Colors.white,
+                              child: ClipOval(
+                                  child: image != null
+                                      ? Image.file(
+                                          image!,
+                                          fit: BoxFit.fill,
+                                        )
+                                      : Image.network(
+                                          userCurrentImage,
+                                          fit: BoxFit.fill,
+                                        )),
+                            ),
+                          ),
+                        ),
                       ),
-                      SizedBox(height: 10.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(flex: 6, child: Text('Balance:')),
-                          Text('RM '),
-                          Expanded(flex: 4, child: Text(balance.toString())),
-                        ],
+                      SizedBox(width: 25.0),
+                      Expanded(
+                        flex: 6,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(flex: 6, child: Text('Name:')),
+                                Text(''),
+                                Expanded(flex: 4, child: Text(name)),
+                              ],
+                            ),
+                            SizedBox(height: 10.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(flex: 6, child: Text('Balance:')),
+                                Text('RM '),
+                                Expanded(
+                                    flex: 4, child: Text(balance.toString())),
+                              ],
+                            ),
+                            SizedBox(height: 15.0),
+                            ElevatedButton.icon(
+                                onPressed: () {
+                                  createAlertDialog(context);
+                                },
+                                icon: Icon(Icons.money),
+                                label: Text('Top up')),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 15.0),
-                      ElevatedButton.icon(
-                          onPressed: () {
-                            createAlertDialog(context);
-                          },
-                          icon: Icon(Icons.money),
-                          label: Text('Top up')),
                     ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 25.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Profile Details',
+                        style: TextStyle(
+                          fontSize: 25.0,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Divider(height: 10.0, color: Colors.black),
+                      SizedBox(height: 5.0),
+                      Card(
+                        elevation: 10.0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 1, child: Icon(Icons.phone)),
+                                SizedBox(width: 10.0),
+                                Expanded(flex: 4, child: Text('Phone No:')),
+                                Flexible(
+                                    flex: 5, child: Text(phoneNo.toString())),
+                              ]),
+                        ),
+                      ),
+                      SizedBox(height: 10.0),
+                      Card(
+                        elevation: 10.0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 1, child: Icon(Icons.home)),
+                                SizedBox(width: 10.0),
+                                Expanded(flex: 4, child: Text('Address:')),
+                                Flexible(flex: 5, child: Text(address)),
+                              ]),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25.0),
+                ],
+              ),
             ),
-            SizedBox(height: 25.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Profile Details',
-                  style: TextStyle(
-                    fontSize: 25.0,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Divider(height: 10.0, color: Colors.black),
-                SizedBox(height: 5.0),
-                Card(
-                  elevation: 10.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 1, child: Icon(Icons.phone)),
-                          SizedBox(width: 10.0),
-                          Expanded(flex: 4, child: Text('Phone No:')),
-                          Flexible(flex: 5, child: Text(phoneNo.toString())),
-                        ]),
-                  ),
-                ),
-                SizedBox(height: 10.0),
-                Card(
-                  elevation: 10.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 1, child: Icon(Icons.home)),
-                          SizedBox(width: 10.0),
-                          Expanded(flex: 4, child: Text('Address:')),
-                          Flexible(flex: 5, child: Text(address)),
-                        ]),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 25.0),
-          ],
-        ),
-      ),
-    );
+          );
   }
 }

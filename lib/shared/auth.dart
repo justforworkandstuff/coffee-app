@@ -147,11 +147,10 @@ class AuthService {
   }
 
   //buying order items
-  Future makeOrder(String productName, double productPrice, String date,
-      String time, String address, String owner) async {
+  Future makeOrder(String productName, double productPrice) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .placeOrder(productName, productPrice, date, time, address, owner);
+          .placeOrder(productName, productPrice);
     } catch (e) {
       print(e.toString());
       return null;
@@ -159,7 +158,7 @@ class AuthService {
   }
 
   //test read fields
-  Future readFififi() async 
+  Future readFields() async 
   {
     try
     {
@@ -173,11 +172,11 @@ class AuthService {
   }
   
   //test delete fields
-  Future deleteFiFi() async
+  Future deleteFields(String id, String productName, String productPrice) async
   {
     try
     {
-      return await DatabaseService(uid: _auth.currentUser!.uid).deleteFields();
+      return await DatabaseService(uid: _auth.currentUser!.uid).deleteFields(id, productName, productPrice);
     }
     catch(e)
     {
