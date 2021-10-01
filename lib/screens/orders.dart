@@ -14,27 +14,42 @@ class _OrdersState extends State<Orders> {
   final AuthService _auth = AuthService();
   var items = ['Latest', 'Oldest'];
   String initialValue = 'Latest';
-  double balance = 0.0;
   Map<String, dynamic>? data;
   var orderList;
   bool loading = false;
+  String sampleID = 'Sample-ID';
+  String sampleProduct = 'Sample Product';
+  String samplePrice = '0.0';
+  var emptyArray = [];
 
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
 
+  //pre-load stuffs
   @override
   void initState() {
     super.initState();
     setState(() => loading = true);
     _auth.readFields().then((value) {
       data = value.data();
-      orderList = data!['orders'];
-      setState(() {
-        loading = false;
+      if (data!['orders'].toString() == emptyArray.toString()) {
+        setState(() {
+          orderList = [
+            {
+              'ID': sampleID,
+              'Price:': samplePrice,
+              'Product': sampleProduct,
+            }
+          ];
+          loading = false;
+        });
+        print('No data available.');
+      } else if (data!.isNotEmpty) {
+        data = value.data();
+        orderList = data!['orders'];
+        setState(() => loading = false);
         print('Read orders done');
-        // test2 = orderList![0]['ID'];
-        // print(test2);
-      });
+      }
     });
   }
 
@@ -43,17 +58,29 @@ class _OrdersState extends State<Orders> {
     setState(() => loading = true);
     _auth.readFields().then((value) {
       data = value.data();
-      orderList = data!['orders'];
-      setState(() {
-        loading = false;
-        print('Read orders done');
-      });
+      if (data!['orders'].toString() == emptyArray.toString()) {
+        setState(() {
+          orderList = [
+            {
+              'ID': sampleID,
+              'Price:': samplePrice,
+              'Product': sampleProduct,
+            }
+          ];
+          loading = false;
+        });
+        print('No data available.');
+      } else if (data!.isNotEmpty) {
+        orderList = data!['orders'];
+        print(orderList.toString());
+        setState(() => loading = false);
+        print('Reload read orders done');
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return loading
         ? Loading()
         : Container(
@@ -103,9 +130,9 @@ class _OrdersState extends State<Orders> {
                   itemCount: orderList.length,
                   itemBuilder: (context, index) {
                     return OrderCard(
-                      id: orderList[index]['ID'],
-                      orderAmount: orderList[index]['Price'],
-                      productName: orderList[index]['Product'],
+                      id: orderList[index]['ID'] ?? sampleID,
+                      orderAmount: orderList[index]['Price'] ?? samplePrice,
+                      productName: orderList[index]['Product'] ?? sampleProduct,
                     );
                     // return Card(
                     //     child: ListTile(
