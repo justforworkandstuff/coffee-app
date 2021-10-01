@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:coffeeproject/models/order.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,7 +11,7 @@ class DatabaseService {
   final CollectionReference userList =
       FirebaseFirestore.instance.collection('User');
   final CollectionReference orderList =
-      FirebaseFirestore.instance.collection('Orders');
+      FirebaseFirestore.instance.collection('Orders'); 
 
   //register new set of user
   Future newUserData(double balance, String address, int orders,
@@ -34,7 +33,13 @@ class DatabaseService {
         'time': 'time',
         'address': 'address',
         'owner': 'owner',
-        'orders': 'orders',
+        'orders': FieldValue.arrayUnion([
+          {
+            'Product': 'Product X',
+            'Price': '0.00',
+            'ID': 'TestID',
+          },
+        ])
       });
     });
   }
@@ -91,8 +96,7 @@ class DatabaseService {
   var uuid = Uuid();
 
   //buy items
-  Future placeOrder(String productName, double productPrice, String date,
-      String time, String address, String owner) async {
+  Future placeOrder(String productName, double productPrice) async {
     return await orderList.doc(uid + 'ORDERID').update({
       // '${uuid.v4()}': [{'Product': '$productName', 'Price': '$productPrice'}],
       // 'orders.${uuid.v4()}': FieldValue.arrayUnion([
@@ -106,7 +110,7 @@ class DatabaseService {
         {
           'Product': '$productName',
           'Price': '$productPrice',
-          'Date': DateTime.now(),
+          'ID': uuid.v4(),
         }
       ]),
       // '${FieldValue.increment(0)}': [{'Product': '$productName', 'Price': '$productPrice'}],
@@ -115,18 +119,21 @@ class DatabaseService {
 
   //read fields
   Future readFields() async {
-    // DocumentSnapshot doc = await orderList.doc(uid + 'ORDERID').get();
-    // List abcd = doc.data().
     return await orderList.doc(uid + 'ORDERID').get();
-    // return await orderList.where('id', isEqualTo: uid + 'ORDERID').get().then((value) {
-    //   value.
-    // });
   }
 
   //delete fields
-  Future deleteFields() async {
+  Future deleteFields(
+      String id, String productName, String productPrice) async {
     return await orderList.doc(uid + 'ORDERID').update({
-      'orders.${uuid.v4}': FieldValue.delete(),
+      // 'orders': FieldValue.delete(),
+      'orders': FieldValue.arrayRemove([
+        {
+          'Product': '$productName',
+          'Price': '$productPrice',
+          'ID': '$id',
+        }
+      ]),
     });
   }
 
@@ -136,22 +143,4 @@ class DatabaseService {
     return await orderList.doc().get();
   }
 
-  //stream listener for changes in orders collection
-  Stream<List<Order>> get orderListener {
-    return orderList.snapshots().map(_orderListFromSnapshot);
-  }
-
-  // cutom class model for orders
-  List<Order> _orderListFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((value) {
-      return Order(
-        date: value.get('date'),
-        time: value.get('time'),
-        address: value.get('address'),
-        productName: value.get('productName'),
-        owner: value.get('owner'),
-        productPrice: value.get('productPrice'),
-      );
-    }).toList();
-  }
 }

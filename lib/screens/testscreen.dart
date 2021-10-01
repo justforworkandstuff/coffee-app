@@ -1,5 +1,8 @@
 import 'package:coffeeproject/shared/auth.dart';
+import 'package:coffeeproject/shared/constants.dart';
+import 'package:coffeeproject/shared/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({Key? key}) : super(key: key);
@@ -14,119 +17,143 @@ class _TestScreenState extends State<TestScreen> {
   String newBalanceText = 'abcde';
   double balance = 0.0;
   Map<String, dynamic>? data;
+  bool loading = false;
 
   String productName = 'Bag abc';
   double productPrice = 99.00;
-  String date = '13-03-99';
-  String time = '13:30';
-  String address = '101010, bbbbbb';
-  String owner = 'ownerName';
+  // String date = '13-03-99';
+  // String time = '13:30';
+  // String address = '101010, bbbbbb';
+  // String owner = 'ownerName';
   var test2;
+  var test;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController priceContoller = TextEditingController();
 
   //reading profile
   @override
   void initState() {
     super.initState();
-    _auth.userItemRead().then((value) {
-      data = value.data();
-      setState(() {
-        owner = data!['userName'];
-        balance = data!['balance'];
-
-        //newBalanceText = 'New Balance: ${data!['balance']}';
-        print('read users done');
-      });
-    });
-    _auth.readFififi().then((value) {
+    setState(() => loading = true);
+    _auth.readFields().then((value) {
       data = value.data();
       test2 = data!['orders'];
       setState(() {
-        // List.from(value.data!['orders']).forEach((element) {
-        //   data = value.data();
-        //   test.add(data!);
-        // });
-        //secTestArray = testArray;
-        //print(secTestArray);
-        //test2 = data!['orders'];
-        //test2 = data!['orders'].toString();
-        // test2 = jsonEncode(test!['37af6b56-b1e6-4cfd-9087-05e8503deef5']);
-        //print(test2);
+        test = test2![0]['ID'];
+        loading = false; 
+        print('read orders done');
       });
     });
-    print('read orders done');
+  }
+
+  void clearFields() {
+    _testKey.currentState!.reset();
+    nameController.clear();
+    priceContoller.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(15.0),
-          child: Form(
-            key: _testKey,
-            child: Column(
-              children: [
-                Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: Column(
-                      children: [
-                        Text(productName),
-                        Text('RM $productPrice'),
-                      ],
-                    ),
+    return loading
+        ? Loading()
+        : Scaffold(
+            body: Center(
+              child: Container(
+                padding: EdgeInsets.all(15.0),
+                child: Form(
+                  key: _testKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: nameController,
+                        decoration: textFormFieldDecoration.copyWith(
+                            hintText: 'Product Name'),
+                        validator: ((val) =>
+                            val!.isEmpty ? 'Please enter something' : null),
+                        onChanged: ((val) {
+                          setState(() {
+                            productName = val;
+                          });
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      TextFormField(
+                        controller: priceContoller,
+                        inputFormatters: [
+                          // FilteringTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}'))
+                        ],
+                        decoration: textFormFieldDecoration.copyWith(
+                            hintText: 'Product Price'),
+                        validator: ((val) =>
+                            val!.isEmpty ? 'Please enter price.' : null),
+                        onChanged: ((val) {
+                          setState(() {
+                            productPrice = double.parse(val);
+                          });
+                        }),
+                      ),
+                      SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (_testKey.currentState!.validate()) {
+                                // await _auth.makeOrder(productName, productPrice,
+                                //     date, time, address, owner);
+                                setState(() => loading = true);
+                                dynamic result = await _auth.makeOrder(
+                                    productName, productPrice);
+                                dynamic result2 = await _auth
+                                    .userBalanceSubtract(balance, productPrice);
+                                if (result == null && result2 == null) {
+                                  setState(() => loading = false);
+                                } else {
+                                  print('buy done');
+                                  clearFields();
+                                  setState(() => loading = false);
+                                }
+                              }
+                            },
+                            child: Text('Buy'),
+                          ),
+                          SizedBox(width: 10.0),
+                          ElevatedButton(
+                            child: Text('Delete'),
+                            onPressed: () async {
+                              await _auth.deleteFields(
+                                  test, productName, productPrice.toString());
+                              print('delete done');
+                            },
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                            itemCount: test2.length,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () async {
+                                  await _auth.deleteFields(test, productName,
+                                      productPrice.toString());
+                                  print('delete done');
+                                },
+                                child: Card(
+                                    child: ListTile(
+                                  title: Text(test2[index]['ID']),
+                                  // title: Text(test2[index]['Product']),
+                                  subtitle: Text('Total Amount : ' +
+                                      test2[index]['Price']),
+                                )),
+                              );
+                            }),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 15.0),
-                // TextFormField(
-                //   decoration: textFormFieldDecoration.copyWith(hintText: 'Item Price'),
-                //   validator: (val) => val!.isEmpty ? 'Please enter a new price.' : null,
-                //   onChanged: ((val) {
-                //     setState(() {
-                //       productPrice = double.parse(val.toString());
-                //     });
-                //   }),
-                // ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_testKey.currentState!.validate()) {
-                      await _auth.makeOrder(productName, productPrice, date,
-                          time, address, owner);
-                      await _auth.userBalanceSubtract(balance, productPrice);
-                      print('buy done');
-                    }
-                  },
-                  child: Text('Buy'),
-                ),
-                ElevatedButton(
-                  child: Text('Delete'),
-                  onPressed: () async {
-                    // await _auth.userItemRead().then((value) {
-                    //   data = value.data();
-                    //   setState(() {
-                    //     newBalanceText = 'New Balance: ${data!['balance']}';
-                    //   });
-                    // });
-                    await _auth.deleteFiFi();
-                    print('delete done');
-                  },
-                ),
-                Expanded(
-                  child: ListView.builder(
-                      itemCount: test2.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                            child: ListTile(
-                          title: Text(test2[index]['Product']),
-                          subtitle: Text(test2[index]['Price']),
-                        ));
-                      }),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
   }
 }
