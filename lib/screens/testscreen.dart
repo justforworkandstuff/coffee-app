@@ -13,60 +13,67 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
-  final _testKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   final AuthService _auth = AuthService();
-  String newBalanceText = 'abcde';
-  double balance = 0.0;
-  Map<String, dynamic>? data;
   bool loading = false;
-
-  String productName = 'Bag abc';
-  double productPrice = 99.00;
-  String date = '13-03-99';
-  String time = '13:30';
-  String address = '101010, bbbbbb';
-  String owner = 'ownerName';
-  var test2;
-  var test;
-  String testName = 'a';
-  double testPrice = 0.0;
+  Map<String, dynamic>? data;
   TextEditingController name = TextEditingController();
   TextEditingController price = TextEditingController();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   setState(() => loading = true);
-  //   // var result = _auth.readProducts();
-  //   FirebaseFirestore.instance.collection('Products').get().then((value) {
-  //     value.docs.forEach((element) {
-  //       var abc = element.data();
-  //       print(abc);
-  //     });
-  //   });
-  //   setState(() => loading = false);
-  //   // _auth.readProducts().then((value) {
-  //   //   print(value.data());
-  //   //   // data = value.data();
-  //   //   setState(() {
-  //   //     loading = false;
-  //   //     testName = data!['Product'];
-  //   //     testPrice = data!['Price'];
-  //   //   });
-  //   // });
-  // }
+  //init state loading to get user balance 
+  double balance = 0.0;
+
+  //dummy data for admin add new product
+  String productName = 'Sample Product Name';
+  double productPrice = 0.0;
+
+  //catches the data loaded for the product stream
+  String testName = 'a';
+  double testPrice = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() => loading = true);
+    _auth.userItemRead().then((value) {
+      data = value.data();
+      setState(() {
+        loading = false;
+        balance = data!['balance'];
+        print('Read done');
+      });
+    });
+  }
 
   //buy product
-  void purchaseClick() async {
+  void purchaseClick(String name, double price) async {
     setState(() => loading = true);
-    dynamic result = await _auth.makeOrder(testName, testPrice);
-    dynamic result2 = await _auth.userBalanceSubtract(balance, testPrice);
+    dynamic result = await _auth.makeOrder(name, price);
+    dynamic result2 = await _auth.userBalanceSubtract(balance, price);
     if (result == null && result2 == null) {
       setState(() => loading = false);
       print('Purchased done.');
     } else {
       print('Failed to purchase.');
       setState(() => loading = false);
+    }
+  }
+
+  //delete product 
+  void deleteClick(String docID) async 
+  {
+    setState(() => loading = true);
+    dynamic result = await _auth.deleteProduct(docID);
+    
+    if(result == null)
+    {
+      setState(() => loading = false);
+      print('Deleted successfully.');
+    }
+    else
+    {
+      setState(() => loading = false);
+      print('Failed to delete.');
     }
   }
 
@@ -89,14 +96,10 @@ class _TestScreenState extends State<TestScreen> {
                 .limit(12)
                 .snapshots(),
             builder: (context, snapshot) {
-
-              // setState(() {
-              //   testName = snapshot.data!.docs[index].get('Product');
-              // });
-
               if (!snapshot.hasData) {
                 return CircularProgressIndicator();
               }
+
               return GridView.builder(
                 physics: ScrollPhysics(),
                 scrollDirection: Axis.vertical,
@@ -107,11 +110,19 @@ class _TestScreenState extends State<TestScreen> {
                   crossAxisCount: 2,
                 ),
                 itemBuilder: (context, index) {
+
+                  var abc = snapshot.data!.docs[index].get('Product');
+                  var bcd = snapshot.data!.docs[index].get('Price');
+                  var deletionID = snapshot.data!.docs[index].reference.id.toString();
+
                   return Column(
                     children: [
                       InkWell(
                         onTap: () async {
-                          purchaseClick();
+                          purchaseClick(abc, bcd);
+                        },
+                        onLongPress: () async {
+                          deleteClick(deletionID);
                         },
                         child: Card(
                           elevation: 10.0,
@@ -144,7 +155,7 @@ class _TestScreenState extends State<TestScreen> {
             child: loading
                 ? Loading()
                 : Form(
-                    key: _testKey,
+                    key: _formKey,
                     child: Column(
                       children: [
                         TextFormField(
@@ -179,7 +190,7 @@ class _TestScreenState extends State<TestScreen> {
                         SizedBox(height: 15.0),
                         ElevatedButton(
                           onPressed: () async {
-                            if (_testKey.currentState!.validate()) {
+                            if (_formKey.currentState!.validate()) {
                               setState(() => loading = true);
                               dynamic result = await _auth.addProduct(
                                   productName, productPrice);

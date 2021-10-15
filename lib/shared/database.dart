@@ -128,8 +128,8 @@ class DatabaseService {
   }
 
   //delete fields
-  Future deleteFields(
-      String id, String productName, String productPrice, String createdAt) async {
+  Future deleteFields(String id, String productName, String productPrice,
+      String createdAt) async {
     return await orderList.doc(uid + 'ORDERID').update({
       // 'orders': FieldValue.delete(),
       'orders': FieldValue.arrayRemove([
@@ -151,26 +151,16 @@ class DatabaseService {
   /// Products
   ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  //read products
-  Future readProductList() async {
-    return await productList.doc().get();
-    // var result = await productList.get().then((value) {
-    //   value.docs.forEach((element) {
-    //     if (element.exists) {
-    //           var abcd = element.data()['Product'];
-    //           var bcdd = element.data()['Price'];
-    //       // print(element.data()['Product']);
-    //       // print(element.data()['Price']);
-    //     }
-    //   });
-    // });
-    // return result;
-  }
-
   // admin input new product
   Future newProductList(String productName, double productPrice) async {
     return await productList
         .doc()
         .set({'Product': productName, 'Price': productPrice});
+  }
+
+  //admin delete specific product 
+  Future removeProduct(String docID) async
+  {
+    return await productList.doc(docID).delete();
   }
 }

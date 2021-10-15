@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffeeproject/reusables/ordercard.dart';
-import 'package:coffeeproject/shared/auth.dart';
 import 'package:coffeeproject/shared/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,8 @@ class Orders extends StatefulWidget {
 }
 
 class _OrdersState extends State<Orders> {
-  final AuthService _auth = AuthService();
+  // final AuthService _auth = AuthService();
+  final _user = FirebaseAuth.instance;
   var items = ['Latest', 'Oldest'];
   String initialValue = 'Latest';
   Map<String, dynamic>? data;
@@ -24,65 +24,9 @@ class _OrdersState extends State<Orders> {
   String samplePrice = '0.0';
   String sampleTime = '01/01/0000';
   var emptyArray = [];
-  final FirebaseAuth _test = FirebaseAuth.instance;
 
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
-
-  //pre-load stuffs
-  @override
-  void initState() {
-    super.initState();
-    setState(() => loading = true);
-    _auth.readFields().then((value) {
-      data = value.data();
-      if (data!['orders'].toString() == emptyArray.toString()) {
-        setState(() {
-          orderList = [
-            {
-              'ID': sampleID,
-              'Price:': samplePrice,
-              'Product': sampleProduct,
-              'Timestamp': sampleTime,
-            }
-          ];
-          loading = false;
-        });
-        print('No data available.');
-      } else if (data!.isNotEmpty) {
-        data = value.data();
-        orderList = data!['orders'];
-        setState(() => loading = false);
-        print('Read orders done');
-      }
-    });
-  }
-
-  //manual refresh
-  void manualRefresh() {
-    setState(() => loading = true);
-    _auth.readFields().then((value) {
-      data = value.data();
-      if (data!['orders'].toString() == emptyArray.toString()) {
-        setState(() {
-          orderList = [
-            {
-              'ID': sampleID,
-              'Price:': samplePrice,
-              'Product': sampleProduct,
-              'Timestamp': sampleTime,
-            }
-          ];
-          loading = false;
-        });
-        print('No data available.');
-      } else if (data!.isNotEmpty) {
-        orderList = data!['orders'];
-        setState(() => loading = false);
-        print('Manual read orders done');
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +35,7 @@ class _OrdersState extends State<Orders> {
         : StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Orders')
-                .doc(_test.currentUser!.uid + 'ORDERID')
+                .doc(_user.currentUser!.uid + 'ORDERID')
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -125,13 +69,6 @@ class _OrdersState extends State<Orders> {
                         flex: 6,
                       ),
                       SizedBox(width: 10.0),
-                      Expanded(
-                        flex: 2,
-                        child: IconButton(
-                          icon: Icon(Icons.refresh),
-                          onPressed: () => manualRefresh(),
-                        ),
-                      ),
                       Expanded(
                         child: DropdownButton<String>(
                           onChanged: (newValue) {

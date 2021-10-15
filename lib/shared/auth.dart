@@ -178,12 +178,11 @@ class AuthService {
 
   //Productsssssssssssssssssss
 
-  //read products
-  Future readProducts() async
-  {
+  //input new product
+  Future addProduct(String productName, double productPrice) async {
     try
     {
-      return await DatabaseService(uid: _auth.currentUser!.uid).readProductList();
+      return await DatabaseService(uid: _auth.currentUser!.uid).newProductList(productName, productPrice);
     }
     catch(e)
     {
@@ -192,11 +191,12 @@ class AuthService {
     }
   }
 
-  //input new product
-  Future addProduct(String productName, double productPrice) async {
+  //delete specific product
+  Future deleteProduct(String docID) async 
+  {
     try
     {
-      return await DatabaseService(uid: _auth.currentUser!.uid).newProductList(productName, productPrice);
+      return await DatabaseService(uid: _auth.currentUser!.uid).removeProduct(docID);
     }
     catch(e)
     {
