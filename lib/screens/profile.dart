@@ -32,6 +32,7 @@ class _ProfileState extends State<Profile> {
   FirebaseStorage storage = FirebaseStorage.instance;
   String userCurrentImage = '';
   bool loading = false;
+  int orders = 0;
 
   // reload dialog
   void createAlertDialog(BuildContext context) {
@@ -145,11 +146,12 @@ class _ProfileState extends State<Profile> {
       data = value.data();
       setState(() {
         loading = false;
-        name = '${data!['userName']}';
+        name = data!['userName'];
         balance = data!['balance'];
         phoneNo = data!['phoneNo'];
-        address = '${data!['address']}';
-        userCurrentImage = '${data!['image']}';
+        address = data!['address'];
+        userCurrentImage = data!['image'];
+        orders = data!['orders'];
         print('update done');
       });
     });
@@ -163,11 +165,11 @@ class _ProfileState extends State<Profile> {
       data = value.data();
       setState(() {
         loading = false;
-        name = '${data!['userName']}';
+        name = data!['userName'];
         balance = data!['balance'];
         phoneNo = data!['phoneNo'];
-        address = '${data!['address']}';
-        userCurrentImage = '${data!['image']}';
+        address = data!['address'];
+        userCurrentImage = data!['image'];
         print('update done');
       });
     });
@@ -183,6 +185,7 @@ class _ProfileState extends State<Profile> {
               padding: EdgeInsets.all(25.0),
               child: Column(
                 children: [
+                  //top row 
                   Row(
                     children: [
                       Expanded(
@@ -220,19 +223,19 @@ class _ProfileState extends State<Profile> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Expanded(flex: 6, child: Text('Name:')),
-                                Text(''),
-                                Expanded(flex: 4, child: Text(name)),
+                                Expanded(flex: 5, child: Text('Name:')),
+                                Text('  '),
+                                Expanded(flex: 5, child: Text(name)),
                               ],
                             ),
                             SizedBox(height: 10.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Expanded(flex: 6, child: Text('Balance:')),
+                                Expanded(flex: 5, child: Text('Balance:')),
                                 Text('RM '),
                                 Expanded(
-                                    flex: 4, child: Text(balance.toString())),
+                                    flex: 5, child: Text(balance.toString())),
                               ],
                             ),
                             SizedBox(height: 15.0),
@@ -248,6 +251,7 @@ class _ProfileState extends State<Profile> {
                     ],
                   ),
                   SizedBox(height: 25.0),
+                  //middle row
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -298,6 +302,7 @@ class _ProfileState extends State<Profile> {
                     ],
                   ),
                   SizedBox(height: 25.0),
+                  Text('Current number of orders: ${orders.toString()}'),
                 ],
               ),
             ),

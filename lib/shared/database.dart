@@ -8,10 +8,9 @@ class DatabaseService {
   DatabaseService({required this.uid});
 
   //collection reference
-  final CollectionReference userList =
-      FirebaseFirestore.instance.collection('User');
-  final CollectionReference orderList =
-      FirebaseFirestore.instance.collection('Orders'); 
+  final userList = FirebaseFirestore.instance.collection('User');
+  final orderList = FirebaseFirestore.instance.collection('Orders');
+  final productList = FirebaseFirestore.instance.collection('Products');
 
   //register new set of user
   Future newUserData(double balance, String address, int orders,
@@ -38,6 +37,7 @@ class DatabaseService {
             'Product': 'Product X',
             'Price': '0.00',
             'ID': 'TestID',
+            'Timestamp': '',
           },
         ])
       });
@@ -111,9 +111,14 @@ class DatabaseService {
           'Product': '$productName',
           'Price': '$productPrice',
           'ID': uuid.v4(),
+          'Timestamp': DateTime.now().toString().substring(0, 16),
         }
       ]),
       // '${FieldValue.increment(0)}': [{'Product': '$productName', 'Price': '$productPrice'}],
+    }).then((value) async {
+      await userList.doc(uid).update({
+        'orders': FieldValue.increment(1),
+      });
     });
   }
 
@@ -124,23 +129,48 @@ class DatabaseService {
 
   //delete fields
   Future deleteFields(
-      String id, String productName, String productPrice) async {
+      String id, String productName, String productPrice, String createdAt) async {
     return await orderList.doc(uid + 'ORDERID').update({
       // 'orders': FieldValue.delete(),
       'orders': FieldValue.arrayRemove([
         {
-          'Product': '$productName',
-          'Price': '$productPrice',
-          'ID': '$id',
+          'Product': productName,
+          'Price': productPrice,
+          'ID': id,
+          'Timestamp': createdAt,
         }
       ]),
+    }).then((value) async {
+      await userList.doc(uid).update({
+        'orders': FieldValue.increment(-1),
+      });
     });
   }
 
-  //reading order Lists
-  // this reads ALL orders from Order collection, needs to be changed.
-  Future readOrders() async {
-    return await orderList.doc().get();
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Products
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //read products
+  Future readProductList() async {
+    return await productList.doc().get();
+    // var result = await productList.get().then((value) {
+    //   value.docs.forEach((element) {
+    //     if (element.exists) {
+    //           var abcd = element.data()['Product'];
+    //           var bcdd = element.data()['Price'];
+    //       // print(element.data()['Product']);
+    //       // print(element.data()['Price']);
+    //     }
+    //   });
+    // });
+    // return result;
   }
 
+  // admin input new product
+  Future newProductList(String productName, double productPrice) async {
+    return await productList
+        .doc()
+        .set({'Product': productName, 'Price': productPrice});
+  }
 }
