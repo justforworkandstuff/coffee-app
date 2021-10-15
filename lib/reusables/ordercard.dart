@@ -1,3 +1,4 @@
+import 'package:coffeeproject/screens/orders.dart';
 import 'package:flutter/material.dart';
 
 class OrderCard extends StatelessWidget {
@@ -7,16 +8,18 @@ class OrderCard extends StatelessWidget {
   final String id;
   final String orderAmount;
   final String productName;
+  final String createdAt;
 
   OrderCard(
-      {required this.id, required this.orderAmount, required this.productName});
+      {required this.id, required this.orderAmount, required this.productName, required this.createdAt});
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, String> testMap = {
+    final Map<String, String> orderMap = {
       'id': id,
       'price': orderAmount,
       'product': productName,
+      'timestamp': createdAt,
     };
 
     return Padding(
@@ -24,9 +27,10 @@ class OrderCard extends StatelessWidget {
       child: Card(
         child: ListTile(
           onTap: () {
-            Navigator.pushNamed(context, '/orderdetails', arguments: testMap);
+            Navigator.pushNamed(context, '/orderdetails', arguments: orderMap);
           },
           title: Text('Order ID: \n\n $id'),
+          subtitle: Text('Ordered: $createdAt'),
           // subtitle: Text('Total Amount : $orderAmount'),
         ),
       ),

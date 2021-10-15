@@ -36,7 +36,7 @@ class HomePagie extends StatelessWidget {
                 Expanded(
                   child: InkWell(
                     onTap: () {
-                      Navigator.pushNamed(context, '/something');
+                      Navigator.pushNamed(context, '/delivery');
                     },
                     child: OrderCards(img: 'assets/555.jpg', text: 'Delivery'),
                   ),

@@ -136,16 +136,6 @@ class AuthService {
     // .map((User? user) => _userFromFirebaseUser(user));
   }
 
-  //reading order items
-  Future orderItemRead() async {
-    try {
-      return await DatabaseService(uid: _auth.currentUser!.uid).readOrders();
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
   //buying order items
   Future makeOrder(String productName, double productPrice) async {
     try {
@@ -157,7 +147,7 @@ class AuthService {
     }
   }
 
-  //test read fields
+  //read order fields
   Future readFields() async 
   {
     try
@@ -171,12 +161,42 @@ class AuthService {
     }
   }
   
-  //test delete fields
-  Future deleteFields(String id, String productName, String productPrice) async
+  //delete fields
+  Future deleteFields(String id, String productName, String productPrice, String createdAt) async
   {
     try
     {
-      return await DatabaseService(uid: _auth.currentUser!.uid).deleteFields(id, productName, productPrice);
+      return await DatabaseService(uid: _auth.currentUser!.uid).deleteFields(
+        id, productName, productPrice, createdAt);
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //Productsssssssssssssssssss
+
+  //read products
+  Future readProducts() async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).readProductList();
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //input new product
+  Future addProduct(String productName, double productPrice) async {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).newProductList(productName, productPrice);
     }
     catch(e)
     {
