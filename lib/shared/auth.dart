@@ -112,6 +112,34 @@ class AuthService {
     }
   }
 
+  //updating user phoneNo
+  Future userPhoneUpdate(int phoneNo) async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).updatePhoneNo(phoneNo);
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null; 
+    }
+  }
+
+  //updating user address
+  Future userAddressUpdate(String address) async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).updateAddress(address);
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null; 
+    }
+  }
+
   /////////////////////////////////////////////////////////////////////////////////////
   //// Orders
   ////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +204,9 @@ class AuthService {
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   //Productsssssssssssssssssss
+  /////////////////////////////////////////////////////////////////////////////
 
   //input new product
   Future addProduct(String productName, double productPrice) async {

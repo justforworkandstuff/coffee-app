@@ -316,19 +316,24 @@ class _SignInState extends State<SignIn> {
                                     userName,
                                     phoneNo,
                                     '');
-                                await uploadFile(image!);
-                                if (result == null) {
+                                dynamic result2 = await uploadFile(image!);
+                                if (result == null && result2 == null) {
+                                  setState(() => loading = false);
+                                  Fluttertoast.showToast(
+                                    msg: 'Register succssfully.',
+                                    gravity: ToastGravity.BOTTOM,
+                                  );
                                   setState(() {
                                     error =
                                         'Please enter a valid email./Email has already been used!';
                                     loading = false;
                                   });
                                 } else {
-                                  Fluttertoast.showToast(
-                                    msg: 'Register succssfully.',
-                                    gravity: ToastGravity.BOTTOM,
-                                  );
-                                  setState(() => loading = false);
+                                  setState(() {
+                                    error =
+                                        'Please enter a valid email./Email has already been used!';
+                                    loading = false;
+                                  });
                                 }
                               }
                             },

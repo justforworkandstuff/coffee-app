@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffeeproject/shared/loading.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:coffeeproject/shared/auth.dart';
@@ -16,26 +19,31 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  //services and keys
+  final FirebaseStorage storage = FirebaseStorage.instance;
   final _validationkey = GlobalKey<FormState>();
   final AuthService _auth = AuthService();
-  Map<String, dynamic>? data;
-
-  String name = '';
-  String userID = '';
-  int phoneNo = 0;
-  String address = '';
-  double balance = 0.0;
-  double reloadAmount = 0.0;
-  String userDD = '';
-  File? image;
-  var sample = AssetImage('assets/useravatar.png');
-  FirebaseStorage storage = FirebaseStorage.instance;
-  String userCurrentImage = '';
+  final _user = FirebaseAuth.instance;
   bool loading = false;
-  int orders = 0;
+
+  //initState and manualRefresh
+  Map<String, dynamic>? data;
+  String userCurrentImage = '';
+  double balance = 0.0;
+
+  //createReloadDialog
+  double reloadAmount = 0.0;
+
+  //createEditDialog
+  int phoneNo = 000;
+  String address = '';
+
+  //uploadFile, removeImage, loadPicker
+  File? image;
+  String emptyImage = 'The current image is already empty.';
 
   // reload dialog
-  void createAlertDialog(BuildContext context) {
+  void createReloadDialog(BuildContext context) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -45,15 +53,16 @@ class _ProfileState extends State<Profile> {
               key: _validationkey,
               child: TextFormField(
                 initialValue: 0.00.toString(),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}'))],
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'^(\d+)?\.?\d{0,2}'))
+                ],
                 decoration:
                     textFormFieldDecoration.copyWith(hintText: 'Reload Amount'),
                 validator: (val) =>
                     val!.isEmpty ? 'Please enter an amount.' : null,
                 onChanged: (val) {
-                  setState(() {
-                    reloadAmount = double.parse(val.toString());
-                  });
+                  setState(() => reloadAmount = double.parse(val.toString()));
                 },
               ),
             ),
@@ -62,9 +71,101 @@ class _ProfileState extends State<Profile> {
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
                       await _auth.userBalanceAdd(balance, reloadAmount);
-                      print('reload done');
+                      print('reload done #createReloadDialog');
                       Navigator.pop(context);
                       manualRefresh();
+                    }
+                  },
+                  child: Text('Confirm')),
+              MaterialButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel')),
+            ],
+          );
+        });
+  }
+
+  // user details phone edit dialog
+  void createEditPhoneDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit'),
+            content: Form(
+              key: _validationkey,
+              child: TextFormField(
+                maxLength: 9,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration:
+                    textFormFieldDecoration.copyWith(hintText: 'Phone number'),
+                validator: (val) =>
+                    val!.isEmpty ? 'Please enter your phone number.' : null,
+                onChanged: (val) {
+                  setState(() => phoneNo = int.parse(val));
+                },
+              ),
+            ),
+            actions: [
+              MaterialButton(
+                  onPressed: () async {
+                    if (_validationkey.currentState!.validate()) {
+                      dynamic result = await _auth.userPhoneUpdate(phoneNo);
+
+                      if (result == null) {
+                        print('update phone done #createEditPhoneDialog');
+                        Navigator.pop(context);
+                      } else {
+                        print('Something went wrong..');
+                      }
+                    }
+                  },
+                  child: Text('Confirm')),
+              MaterialButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel')),
+            ],
+          );
+        });
+  }
+
+  // user details address edit dialog
+  void createEditAddressDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit'),
+            content: Form(
+              key: _validationkey,
+              child: TextFormField(
+                maxLength: 100,
+                maxLines: 3,
+                decoration:
+                    textFormFieldDecoration.copyWith(hintText: 'Address'),
+                validator: (val) =>
+                    val!.isEmpty ? 'Please enter your address.' : null,
+                onChanged: (val) {
+                  setState(() => address = val);
+                },
+              ),
+            ),
+            actions: [
+              MaterialButton(
+                  onPressed: () async {
+                    if (_validationkey.currentState!.validate()) {
+                      dynamic result = await _auth.userAddressUpdate(address);
+
+                      if (result == null) {
+                        print('update address done #createEditAddressDialog');
+                        Navigator.pop(context);
+                      } else {
+                        print('Something went wrong..');
+                      }
                     }
                   },
                   child: Text('Confirm')),
@@ -101,9 +202,43 @@ class _ProfileState extends State<Profile> {
                       Navigator.pop(context);
                     },
                   ),
+                  ListTile(
+                    title: Text('Remove picture'),
+                    onTap: () {
+                      removeImage();
+                      Navigator.pop(context);
+                    },
+                  ),
                 ],
               ),
             ));
+  }
+
+  //remove image
+  void removeImage() async {
+    try {
+      if (userCurrentImage != '') {
+        FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
+        setState(() {
+          loading = true;
+          userCurrentImage = '';
+        });
+        dynamic result = await _auth.userImageAdd(userCurrentImage);
+
+        if (result == null) {
+          Fluttertoast.showToast(msg: 'User image removed successfully.');
+          setState(() => loading = false);
+        } else {
+          Fluttertoast.showToast(msg: 'Something went wrong..');
+          setState(() => loading = false);
+        }
+      } else {
+        Fluttertoast.showToast(msg: emptyImage);
+        print(emptyImage);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   //image picker
@@ -115,7 +250,7 @@ class _ProfileState extends State<Profile> {
         setState(() {
           image = File(pickedImaged.path);
         });
-        uploadFile(image!);
+        await uploadFile(image!);
       } else if (pickedImaged == null) return;
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
@@ -124,6 +259,7 @@ class _ProfileState extends State<Profile> {
 
   //uploading image to firebase storage
   Future uploadFile(File _theImage) async {
+    setState(() => loading = true);
     var url;
     if (image == null) return;
 
@@ -132,7 +268,19 @@ class _ProfileState extends State<Profile> {
     UploadTask uploadTask = ref.putFile(_theImage);
     uploadTask.whenComplete(() async {
       url = await ref.getDownloadURL();
-      _auth.userImageAdd(url);
+      dynamic result = await _auth.userImageAdd(url);
+      if (userCurrentImage != '') {
+        FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
+      }
+
+      if (result == null) {
+        setState(() => loading = false);
+        Fluttertoast.showToast(msg: 'Image added successfully');
+        manualRefresh();
+      } else {
+        setState(() => loading = false);
+        Fluttertoast.showToast(msg: 'Image add error. Please try again.');
+      }
     });
     return url;
   }
@@ -146,13 +294,9 @@ class _ProfileState extends State<Profile> {
       data = value.data();
       setState(() {
         loading = false;
-        name = data!['userName'];
         balance = data!['balance'];
-        phoneNo = data!['phoneNo'];
-        address = data!['address'];
         userCurrentImage = data!['image'];
-        orders = data!['orders'];
-        print('update done');
+        print('read userImage done #initState');
       });
     });
   }
@@ -160,17 +304,13 @@ class _ProfileState extends State<Profile> {
   //manual refresh
   void manualRefresh() {
     setState(() => loading = true);
-    setState(() => loading = true);
     _auth.userItemRead().then((value) {
       data = value.data();
       setState(() {
         loading = false;
-        name = data!['userName'];
         balance = data!['balance'];
-        phoneNo = data!['phoneNo'];
-        address = data!['address'];
         userCurrentImage = data!['image'];
-        print('update done');
+        print('refresh userImage done #manualRefresh');
       });
     });
   }
@@ -181,131 +321,189 @@ class _ProfileState extends State<Profile> {
         ? Loading()
         : SingleChildScrollView(
             child: Container(
-              alignment: Alignment.bottomRight,
-              padding: EdgeInsets.all(25.0),
-              child: Column(
-                children: [
-                  //top row 
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: CircleAvatar(
-                          radius: 55.0,
-                          backgroundColor: Colors.green[300],
-                          child: InkWell(
-                            onTap: () {
-                              _showPickedOptionsDialog(context);
-                            },
-                            child: CircleAvatar(
-                              radius: 50.0,
-                              backgroundColor: Colors.white,
-                              child: ClipOval(
-                                  child: image != null
-                                      ? Image.file(
-                                          image!,
-                                          fit: BoxFit.fill,
-                                        )
-                                      : Image.network(
-                                          userCurrentImage,
-                                          fit: BoxFit.fill,
-                                        )),
-                            ),
+                alignment: Alignment.bottomRight,
+                padding: EdgeInsets.all(25.0),
+                child: StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('User')
+                        .doc(_user.currentUser!.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      }
+
+                      final DocumentSnapshot? userSnapshot = snapshot.data;
+                      final Map<String, dynamic> userMap =
+                          userSnapshot!.data() as Map<String, dynamic>;
+
+                      return Column(
+                        children: [
+                          //top row
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 4,
+                                child: CircleAvatar(
+                                  radius: 55.0,
+                                  backgroundColor: Colors.green[300],
+                                  child: InkWell(
+                                    onTap: () {
+                                      _showPickedOptionsDialog(context);
+                                    },
+                                    child: CircleAvatar(
+                                      foregroundImage:
+                                          NetworkImage(userMap['image']),
+                                      radius: 50.0,
+                                      backgroundColor: Colors.white,
+                                      backgroundImage:
+                                          Image.asset('assets/useravatar.png')
+                                              .image,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 25.0),
+                              Expanded(
+                                flex: 6,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(flex: 5, child: Text('Name:')),
+                                        Text('  '),
+                                        Expanded(
+                                            flex: 5,
+                                            child: Text(userMap['userName'])),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10.0),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                            flex: 5, child: Text('Balance:')),
+                                        Expanded(
+                                            flex: 5,
+                                            child: Text(
+                                                'RM ${userMap['balance']}')),
+                                      ],
+                                    ),
+                                    SizedBox(height: 15.0),
+                                    ElevatedButton.icon(
+                                        onPressed: () {
+                                          createReloadDialog(context);
+                                        },
+                                        icon: Icon(Icons.money),
+                                        label: Text('Top up')),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                      SizedBox(width: 25.0),
-                      Expanded(
-                        flex: 6,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Expanded(flex: 5, child: Text('Name:')),
-                                Text('  '),
-                                Expanded(flex: 5, child: Text(name)),
-                              ],
-                            ),
-                            SizedBox(height: 10.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Expanded(flex: 5, child: Text('Balance:')),
-                                Text('RM '),
-                                Expanded(
-                                    flex: 5, child: Text(balance.toString())),
-                              ],
-                            ),
-                            SizedBox(height: 15.0),
-                            ElevatedButton.icon(
-                                onPressed: () {
-                                  createAlertDialog(context);
-                                },
-                                icon: Icon(Icons.money),
-                                label: Text('Top up')),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 25.0),
-                  //middle row
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Profile Details',
-                        style: TextStyle(
-                          fontSize: 25.0,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Divider(height: 10.0, color: Colors.black),
-                      SizedBox(height: 5.0),
-                      Card(
-                        elevation: 10.0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 1, child: Icon(Icons.phone)),
-                                SizedBox(width: 10.0),
-                                Expanded(flex: 4, child: Text('Phone No:')),
-                                Flexible(
-                                    flex: 5, child: Text(phoneNo.toString())),
-                              ]),
-                        ),
-                      ),
-                      SizedBox(height: 10.0),
-                      Card(
-                        elevation: 10.0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 1, child: Icon(Icons.home)),
-                                SizedBox(width: 10.0),
-                                Expanded(flex: 4, child: Text('Address:')),
-                                Flexible(flex: 5, child: Text(address)),
-                              ]),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 25.0),
-                  Text('Current number of orders: ${orders.toString()}'),
-                ],
-              ),
-            ),
+                          SizedBox(height: 25.0),
+                          //middle row
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                'Profile Details',
+                                style: TextStyle(
+                                  fontSize: 25.0,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Divider(height: 10.0, color: Colors.black),
+                              SizedBox(height: 5.0),
+                              Card(
+                                elevation: 10.0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: Icon(Icons.phone),
+                                      ),
+                                      SizedBox(width: 10.0),
+                                      Expanded(
+                                        flex: 4,
+                                        child: Text('Phone No:'),
+                                      ),
+                                      Expanded(
+                                        flex: 4,
+                                        child: Text(
+                                          userMap['phoneNo'].toString(),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: IconButton(
+                                          icon: Icon(Icons.edit),
+                                          onPressed: () {
+                                            createEditPhoneDialog(context);
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10.0),
+                              Card(
+                                elevation: 10.0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Icon(Icons.home),
+                                        ),
+                                        SizedBox(width: 10.0),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text('Address:'),
+                                        ),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            userMap['address'],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: IconButton(
+                                            icon: Icon(Icons.edit),
+                                            onPressed: () {
+                                              createEditAddressDialog(context);
+                                            },
+                                          ),
+                                        ),
+                                      ]),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 25.0),
+                          Text(
+                              'Current number of orders: ${userMap['orders'].toString()}'),
+                        ],
+                      );
+                    })),
           );
   }
 }

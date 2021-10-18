@@ -26,18 +26,13 @@ class DatabaseService {
     }).then((value) async {
       String orderID = uid + 'ORDERID';
       await orderList.doc(orderID).set({
-        'productName': 'productName',
-        'productPrice': 0.00,
-        'date': 'date',
-        'time': 'time',
-        'address': 'address',
-        'owner': 'owner',
+        'owner': uid,
         'orders': FieldValue.arrayUnion([
           {
-            'Product': 'Product X',
-            'Price': '0.00',
-            'ID': 'TestID',
-            'Timestamp': '',
+            'Product': 'Sample Product',
+            'Price': '0.0',
+            'ID': 'Sample-ID',
+            'Timestamp': '01/01/0000',
           },
         ])
       });
@@ -51,6 +46,22 @@ class DatabaseService {
 
     return await userList.doc(uid).update({
       'balance': abc,
+    });
+  }
+
+  //update user Phone No
+  Future updatePhoneNo(int phoneNo) async
+  {
+    return await userList.doc(uid).update({
+      'phoneNo': phoneNo
+    });
+  }
+
+  //update user address 
+  Future updateAddress(String address) async
+  {
+    return await userList.doc(uid).update({
+      'address': address
     });
   }
 
