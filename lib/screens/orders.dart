@@ -14,8 +14,6 @@ class Orders extends StatefulWidget {
 class _OrdersState extends State<Orders> {
   // final AuthService _auth = AuthService();
   final _user = FirebaseAuth.instance;
-  var items = ['Latest', 'Oldest'];
-  String initialValue = 'Latest';
   Map<String, dynamic>? data;
   var orderList;
   bool loading = false;
@@ -23,7 +21,7 @@ class _OrdersState extends State<Orders> {
   String sampleProduct = 'Sample Product';
   String samplePrice = '0.0';
   String sampleTime = '01/01/0000';
-  var emptyArray = [];
+  bool isSampleData = false;
 
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
@@ -66,22 +64,6 @@ class _OrdersState extends State<Orders> {
                             decoration: TextDecoration.underline,
                           ),
                         ),
-                        flex: 6,
-                      ),
-                      SizedBox(width: 10.0),
-                      Expanded(
-                        child: DropdownButton<String>(
-                          onChanged: (newValue) {
-                            setState(() => initialValue = newValue!);
-                          },
-                          value: initialValue,
-                          items: items.map(orderMenu).toList(),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.pinkAccent,
-                          ),
-                        ),
-                        flex: 2,
                       ),
                     ]),
                     SizedBox(height: 10.0),
@@ -90,14 +72,29 @@ class _OrdersState extends State<Orders> {
                         child: ListView.builder(
                       itemCount: someList.length,
                       itemBuilder: (context, index) {
+                        // // check if its sample data
+                        // void testFunc() {
+                        //   if (someList[index]['ID'] == sampleID) {
+                        //     if (someList[index]['Price'] == samplePrice) {
+                        //       if (someList[index]['Product'] == sampleProduct) {
+                        //         if (someList[index]['Timestamp'] ==
+                        //             sampleTime) {
+                        //           setState(() => isSampleData = true);
+                        //         }
+                        //       }
+                        //     }
+                        //   }
+                        // }
+
                         return OrderCard(
-                          id: someList[index]['ID'] ?? sampleID,
-                          orderAmount: someList[index]['Price'] ?? samplePrice,
-                          productName:
-                              someList[index]['Product'] ?? sampleProduct,
-                          createdAt:
-                              someList[index]['Timestamp'] ?? sampleTime,
-                        );
+                                id: someList[index]['ID'] ?? sampleID,
+                                orderAmount:
+                                    someList[index]['Price'] ?? samplePrice,
+                                productName:
+                                    someList[index]['Product'] ?? sampleProduct,
+                                createdAt:
+                                    someList[index]['Timestamp'] ?? sampleTime,
+                              );
                       },
                     ))
                   ],
