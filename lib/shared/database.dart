@@ -27,14 +27,15 @@ class DatabaseService {
       String orderID = uid + 'ORDERID';
       await orderList.doc(orderID).set({
         'owner': uid,
-        'orders': FieldValue.arrayUnion([
-          {
-            'Product': 'Sample Product',
-            'Price': '0.0',
-            'ID': 'Sample-ID',
-            'Timestamp': '01/01/0000',
-          },
-        ])
+        'orders': [],
+        // 'orders': FieldValue.arrayUnion([
+        //   {
+        //     'Product': 'Sample Product',
+        //     'Price': '0.0',
+        //     'ID': 'Sample-ID',
+        //     'Timestamp': '01/01/0000',
+        //   },
+        // ])
       });
     });
   }
