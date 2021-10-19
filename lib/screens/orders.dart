@@ -72,20 +72,6 @@ class _OrdersState extends State<Orders> {
                         child: ListView.builder(
                       itemCount: someList.length,
                       itemBuilder: (context, index) {
-                        // // check if its sample data
-                        // void testFunc() {
-                        //   if (someList[index]['ID'] == sampleID) {
-                        //     if (someList[index]['Price'] == samplePrice) {
-                        //       if (someList[index]['Product'] == sampleProduct) {
-                        //         if (someList[index]['Timestamp'] ==
-                        //             sampleTime) {
-                        //           setState(() => isSampleData = true);
-                        //         }
-                        //       }
-                        //     }
-                        //   }
-                        // }
-
                         return OrderCard(
                                 id: someList[index]['ID'] ?? sampleID,
                                 orderAmount:
