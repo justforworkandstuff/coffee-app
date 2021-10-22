@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:coffeeproject/reusables/ordercard.dart';
+import 'package:coffeeproject/models/user.dart';
+import 'package:coffeeproject/shared/auth.dart';
 import 'package:coffeeproject/shared/loading.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Orders extends StatefulWidget {
   const Orders({Key? key}) : super(key: key);
@@ -12,8 +13,7 @@ class Orders extends StatefulWidget {
 }
 
 class _OrdersState extends State<Orders> {
-  // final AuthService _auth = AuthService();
-  final _user = FirebaseAuth.instance;
+  final AuthService _auth = AuthService();
   Map<String, dynamic>? data;
   var orderList;
   bool loading = false;
@@ -21,19 +21,49 @@ class _OrdersState extends State<Orders> {
   String sampleProduct = 'Sample Product';
   String samplePrice = '0.0';
   String sampleTime = '01/01/0000';
-  bool isSampleData = false;
+  double balance = 0.0;
 
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
 
+  //to get the balance of the user and pass to orderDetails
+  @override
+  void initState() {
+    super.initState();
+    setState(() => loading = true);
+    _auth.userItemRead().then((value) {
+      data = value.data();
+      setState(() {
+        loading = false;
+        balance = data!['balance'];
+        print('Initial read balance done #initState #orders.dart');
+      });
+    });
+  }
+
+  //manual refresh
+  void manualRefresh() {
+    setState(() => loading = true);
+    _auth.userItemRead().then((value) {
+      data = value.data();
+      setState(() {
+        loading = false;
+        balance = data!['balance'];
+        print('Refresh userImage done #manualRefresh');
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<CustomUser?>(context);
+
     return loading
         ? Loading()
         : StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Orders')
-                .doc(_user.currentUser!.uid + 'ORDERID')
+                .doc(user!.userID + 'ORDERID')
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -72,15 +102,28 @@ class _OrdersState extends State<Orders> {
                         child: ListView.builder(
                       itemCount: someList.length,
                       itemBuilder: (context, index) {
-                        return OrderCard(
-                                id: someList[index]['ID'] ?? sampleID,
-                                orderAmount:
-                                    someList[index]['Price'] ?? samplePrice,
-                                productName:
-                                    someList[index]['Product'] ?? sampleProduct,
-                                createdAt:
-                                    someList[index]['Timestamp'] ?? sampleTime,
-                              );
+
+                        final Map<String, String> orderMap = {
+                          'id': someList[index]['ID'] ?? sampleID,
+                          'price': someList[index]['Price'] ?? samplePrice,
+                          'product':  someList[index]['Product'] ?? sampleProduct,
+                          'timestamp': someList[index]['Timestamp'] ?? sampleTime,
+                          'balance': balance.toString(),
+                        };
+
+                        return Padding(
+                          padding: EdgeInsets.only(top: 10.0),
+                          child: Card(
+                            child: ListTile(
+                              onTap: () async {
+                                Navigator.pushNamed(context, '/orderdetails',
+                                    arguments: orderMap).then((_) => manualRefresh());
+                              },
+                              title: Text('Order ID: \n\n ${someList[index]['ID']}'),
+                              subtitle: Text('Ordered: ${someList[index]['Timestamp']}'),
+                            ),
+                          ),
+                        );
                       },
                     ))
                   ],
@@ -91,62 +134,3 @@ class _OrdersState extends State<Orders> {
   }
 }
 
-// loading
-//         ? Loading()
-//         : Container(
-//             padding: EdgeInsets.all(25.0),
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Row(children: [
-//                   Expanded(
-//                     child: Text(
-//                       'Orders',
-//                       style: TextStyle(
-//                         fontSize: 30.0,
-//                         fontWeight: FontWeight.bold,
-//                         decoration: TextDecoration.underline,
-//                       ),
-//                     ),
-//                     flex: 6,
-//                   ),
-//                   SizedBox(width: 10.0),
-//                   Expanded(
-//                     flex: 2,
-//                     child: IconButton(
-//                       icon: Icon(Icons.refresh),
-//                       onPressed: () => manualRefresh(),
-//                     ),
-//                   ),
-//                   Expanded(
-//                     child: DropdownButton<String>(
-//                       onChanged: (newValue) {
-//                         setState(() => initialValue = newValue!);
-//                       },
-//                       value: initialValue,
-//                       items: items.map(orderMenu).toList(),
-//                       underline: Container(
-//                         height: 2,
-//                         color: Colors.pinkAccent,
-//                       ),
-//                     ),
-//                     flex: 2,
-//                   ),
-//                 ]),
-//                 SizedBox(height: 10.0),
-//                 Divider(height: 10.0, color: Colors.black),
-//                 Expanded(
-//                     child: ListView.builder(
-//                   itemCount: orderList.length,
-//                   itemBuilder: (context, index) {
-//                     return OrderCard(
-//                       id: orderList[index]['ID'] ?? sampleID,
-//                       orderAmount: orderList[index]['Price'] ?? samplePrice,
-//                       productName: orderList[index]['Product'] ?? sampleProduct,
-//                       createdAt: orderList[index]['Timestamp'] ?? sampleTime,
-//                     );
-//                   },
-//                 ))
-//               ],
-//             ),
-//           );
