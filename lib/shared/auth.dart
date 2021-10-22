@@ -1,4 +1,3 @@
-import 'package:coffeeproject/models/order.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/shared/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -155,20 +154,6 @@ class AuthService {
   /////////////////////////////////////////////////////////////////////////////////////
   //// Orders
   ////////////////////////////////////////////////////////////////////////////////////
-
-  //map Firebase User class to model Order class
-  Order? _orderFromFirebase(User? user) {
-    return user != null
-        ? Order(
-            productName: '',
-            productPrice: 0.0,
-            date: '',
-            time: '',
-            address: '',
-            owner: '',
-          )
-        : null;
-  }
 
   //buying order items
   Future makeOrder(String productName, double productPrice) async {

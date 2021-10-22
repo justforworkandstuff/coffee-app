@@ -1,4 +1,4 @@
-import 'package:coffeeproject/reusables/homie.dart';
+import 'package:coffeeproject/screens/homie.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/screens/orders.dart';
 import 'package:coffeeproject/screens/testscreen.dart';

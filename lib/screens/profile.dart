@@ -296,7 +296,7 @@ class _ProfileState extends State<Profile> {
         loading = false;
         balance = data!['balance'];
         userCurrentImage = data!['image'];
-        print('read userImage done #initState #profile.dart');
+        print('Initial read userImage done #initState #profile.dart');
       });
     });
   }
@@ -310,7 +310,7 @@ class _ProfileState extends State<Profile> {
         loading = false;
         balance = data!['balance'];
         userCurrentImage = data!['image'];
-        print('refresh userImage done #manualRefresh');
+        print('Refresh userImage done #manualRefresh');
       });
     });
   }

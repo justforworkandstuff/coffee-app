@@ -31,6 +31,7 @@ class _TestScreenState extends State<TestScreen> {
   String testName = 'a';
   double testPrice = 0.0;
 
+  //loads balance whenever screen starts
   @override
   void initState() {
     super.initState();
@@ -40,7 +41,20 @@ class _TestScreenState extends State<TestScreen> {
       setState(() {
         loading = false;
         balance = data!['balance'];
-        print('Read done');
+        print('Initial balance read done. #initState #testscreen.dart');
+      });
+    });
+  }
+
+  //perform manual refresh on balance
+  void manualRefresh() {
+    setState(() => loading = true);
+    _auth.userItemRead().then((value) {
+      data = value.data();
+      setState(() {
+        loading = false;
+        balance = data!['balance'];
+        print('Balance reload done. #manualRefresh #testScreen.dart');
       });
     });
   }
@@ -52,7 +66,8 @@ class _TestScreenState extends State<TestScreen> {
     dynamic result2 = await _auth.userBalanceSubtract(balance, price);
     if (result == null && result2 == null) {
       setState(() => loading = false);
-      print('Purchased done.');
+      manualRefresh();
+      print('Purchased done. #purchaseClick #testScreen.dart');
     } else {
       print('Failed to purchase.');
       setState(() => loading = false);
