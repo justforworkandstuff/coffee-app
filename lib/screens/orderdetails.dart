@@ -11,18 +11,19 @@ class OrderDetails extends StatefulWidget {
 
 class _OrderDetailsState extends State<OrderDetails> {
   final AuthService _auth = AuthService();
-  bool isSampleDetails = false;
   String? idKey;
   String? productKey;
   String? priceKey;
   String? createdAtKey;
+  String? balanceKey;
 
   //delete order
-  void deleteOrder(String id, String productName, String productPrice,
-      String createdAt) async {
+  void deleteOrder(String id, String productName, double balance,
+      double productPrice, String createdAt) async {
     dynamic result =
         await _auth.deleteFields(id, productName, productPrice, createdAt);
-    if (result == null) {
+    dynamic result2 = await _auth.userBalanceReturn(balance, productPrice);
+    if (result == null && result2 == null) {
       Navigator.pop(context);
       print('Cancel order done.');
     } else {
@@ -40,10 +41,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     priceKey = todo['price'];
     productKey = todo['product'];
     createdAtKey = todo['timestamp'];
-
-    if (idKey == 'Sample-ID') {
-      setState(() => isSampleDetails = true);
-    }
+    balanceKey = todo['balance'];
 
     return SafeArea(
       child: Scaffold(
@@ -58,12 +56,10 @@ class _OrderDetailsState extends State<OrderDetails> {
               Text('Total amount : $priceKey'),
               Text('Ordered at: $createdAtKey'),
               ElevatedButton(
-                onPressed: isSampleDetails
-                    ? null
-                    : () async {
-                        deleteOrder(
-                            idKey!, productKey!, priceKey!, createdAtKey!);
-                      },
+                onPressed: () async {
+                  deleteOrder(idKey!, productKey!, double.parse(balanceKey!),
+                      double.parse(priceKey!), createdAtKey!);
+                },
                 child: Text('Cancel Order'),
               ),
             ]),

@@ -296,7 +296,7 @@ class _ProfileState extends State<Profile> {
         loading = false;
         balance = data!['balance'];
         userCurrentImage = data!['image'];
-        print('read userImage done #initState');
+        print('read userImage done #initState #profile.dart');
       });
     });
   }

@@ -88,6 +88,18 @@ class AuthService {
     }
   }
 
+  //return balance after cancelling order
+  Future userBalanceReturn(
+      double balance, double price) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .returnBalance(balance, price);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
   //reading user items
   Future userItemRead() async {
     try {
@@ -158,12 +170,6 @@ class AuthService {
         : null;
   }
 
-  // auth change user stream
-  Stream<Order?> get streamOrder {
-    return _auth.authStateChanges().map((_orderFromFirebase));
-    // .map((User? user) => _userFromFirebaseUser(user));
-  }
-
   //buying order items
   Future makeOrder(String productName, double productPrice) async {
     try {
@@ -190,7 +196,7 @@ class AuthService {
   }
   
   //delete fields
-  Future deleteFields(String id, String productName, String productPrice, String createdAt) async
+  Future deleteFields(String id, String productName, double productPrice, String createdAt) async
   {
     try
     {

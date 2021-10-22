@@ -8,9 +8,10 @@ class OrderCard extends StatelessWidget {
   final String orderAmount;
   final String productName;
   final String createdAt;
+  final double balance;
 
   OrderCard(
-      {required this.id, required this.orderAmount, required this.productName, required this.createdAt});
+      {required this.id, required this.orderAmount, required this.productName, required this.createdAt, required this.balance});
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +20,7 @@ class OrderCard extends StatelessWidget {
       'price': orderAmount,
       'product': productName,
       'timestamp': createdAt,
+      'balance': balance.toString(),
     };
 
     return Padding(
