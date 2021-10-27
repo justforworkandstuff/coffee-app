@@ -35,7 +35,7 @@ class _SignInState extends State<SignIn> {
   String userName = '';
   String address = '';
   int orders = 0;
-  int phoneNo = 000 - 0000000;
+  int phoneNo = 123456789;
   File? image;
   FirebaseStorage storage = FirebaseStorage.instance;
   String userCurrentImage = '';
@@ -245,13 +245,22 @@ class _SignInState extends State<SignIn> {
                         Visibility(
                           visible: toggleRegister,
                           child: TextFormField(
+                            maxLength: 9,
                             controller: _phoneController,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
                             decoration: textFormFieldDecoration.copyWith(
                                 hintText: 'Register your phone number.'),
-                            validator: (val) => val!.isEmpty
-                                ? 'Please enter your phone number.'
-                                : null,
+                            validator: (val) {
+                              if (val!.isEmpty) {
+                                return 'Please enter your phone number';
+                              } else if (val.length < 9) {
+                                return 'Minimum length = 9.';
+                              } else {
+                                return null;
+                              }
+                            },
                             onChanged: ((val) {
                               setState(() {
                                 phoneNo = int.parse(val.toString());
@@ -263,6 +272,8 @@ class _SignInState extends State<SignIn> {
                         Visibility(
                           visible: toggleRegister,
                           child: TextFormField(
+                            maxLength: 100,
+                            maxLines: 3,
                             controller: _addressController,
                             decoration: textFormFieldDecoration.copyWith(
                                 hintText: 'Register your address.'),
@@ -318,22 +329,17 @@ class _SignInState extends State<SignIn> {
                                     '');
                                 dynamic result2 = await uploadFile(image!);
                                 if (result == null && result2 == null) {
-                                  setState(() => loading = false);
-                                  Fluttertoast.showToast(
-                                    msg: 'Register succssfully.',
-                                    gravity: ToastGravity.BOTTOM,
-                                  );
                                   setState(() {
                                     error =
                                         'Please enter a valid email./Email has already been used!';
                                     loading = false;
                                   });
                                 } else {
-                                  setState(() {
-                                    error =
-                                        'Please enter a valid email./Email has already been used!';
-                                    loading = false;
-                                  });
+                                  setState(() => loading = false);
+                                  Fluttertoast.showToast(
+                                    msg: 'Register succssfully.',
+                                    gravity: ToastGravity.BOTTOM,
+                                  );
                                 }
                               }
                             },

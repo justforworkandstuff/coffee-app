@@ -49,7 +49,7 @@ class _OrdersState extends State<Orders> {
       setState(() {
         loading = false;
         balance = data!['balance'];
-        print('Refresh userImage done #manualRefresh');
+        print('Manual refresh balance done #manualRefresh #orders.dart');
       });
     });
   }
@@ -86,6 +86,7 @@ class _OrdersState extends State<Orders> {
                   children: [
                     Row(children: [
                       Expanded(
+                        flex: 6,
                         child: Text(
                           'Orders',
                           style: TextStyle(
@@ -94,6 +95,10 @@ class _OrdersState extends State<Orders> {
                             decoration: TextDecoration.underline,
                           ),
                         ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text('Cart Amount: ${something['cartAmount']}'),
                       ),
                     ]),
                     SizedBox(height: 10.0),

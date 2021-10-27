@@ -1,9 +1,10 @@
 import 'package:coffeeproject/screens/homie.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/screens/orders.dart';
+import 'package:coffeeproject/screens/products.dart';
+import 'package:coffeeproject/screens/profile.dart';
 import 'package:coffeeproject/screens/testscreen.dart';
 import 'package:coffeeproject/shared/auth.dart';
-import 'package:coffeeproject/shared/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,9 +21,10 @@ class _HomeState extends State<Home> {
 
   int _selectedIndex = 0;
   List<Widget> _pageList = [
-    HomePagie(color: Colors.pink),
+    HomePagie(),
+    Products(),
     Orders(),
-    Wrapper(),
+    Profile(),
     TestScreen(),
   ];
 
@@ -40,7 +42,6 @@ class _HomeState extends State<Home> {
       initialData: null,
       value: AuthService().streamUser,
       child: Scaffold(
-        // key: _scaffoldKey,
         appBar: AppBar(
           title: Text('Gigi Coffee'),
           actions: [
@@ -71,6 +72,7 @@ class _HomeState extends State<Home> {
           unselectedItemColor: Colors.grey,
           items: [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'Products'),
             BottomNavigationBarItem(icon: Icon(Icons.money), label: 'Orders'),
             BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Profile'),
             BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Test'),

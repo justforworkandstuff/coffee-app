@@ -1,6 +1,5 @@
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class OrderDetails extends StatefulWidget {
   const OrderDetails({Key? key}) : super(key: key);
@@ -20,17 +19,19 @@ class _OrderDetailsState extends State<OrderDetails> {
   //delete order
   void deleteOrder(String id, String productName, double balance,
       double productPrice, String createdAt) async {
-    dynamic result =
-        await _auth.deleteFields(id, productName, productPrice, createdAt);
-    dynamic result2 = await _auth.userBalanceReturn(balance, productPrice);
-    if (result == null && result2 == null) {
-      Navigator.pop(context);
-      print('Cancel order done.');
-    } else {
-      Fluttertoast.showToast(
-          msg: 'Something went wrong. Order is not canceled');
-      print('Can\'t cancel order.');
-    }
+    await _auth.deleteOrderFields(id, productName, productPrice, createdAt);
+    await _auth.cartAmountReturn(productPrice);
+
+    Navigator.pop(context);
+    print('Cancel order done. #deleteOrder #orderDetails.dart');
+    // if (result == null && result2 == null) {
+    //   Navigator.pop(context);
+    //   print('Cancel order done.');
+    // } else {
+    //   Fluttertoast.showToast(
+    //       msg: 'Something went wrong. Order is not canceled');
+    //   print('Can\'t cancel order.');
+    // }
   }
 
   @override

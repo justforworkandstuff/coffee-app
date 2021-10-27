@@ -70,10 +70,16 @@ class _ProfileState extends State<Profile> {
               MaterialButton(
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
-                      await _auth.userBalanceAdd(balance, reloadAmount);
-                      print('reload done #createReloadDialog');
-                      Navigator.pop(context);
-                      manualRefresh();
+                      dynamic result =
+                          await _auth.userBalanceAdd(balance, reloadAmount);
+
+                      if (result == null) {
+                        print('Something went wrong.');
+                      } else {
+                        print('reload done #createReloadDialog');
+                        Navigator.pop(context);
+                        manualRefresh();
+                      }
                     }
                   },
                   child: Text('Confirm')),
@@ -88,7 +94,7 @@ class _ProfileState extends State<Profile> {
   }
 
   // user details phone edit dialog
-  void createEditPhoneDialog(BuildContext context) {
+  void createEditPhoneDialog(BuildContext context, int initialNumber) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -97,12 +103,24 @@ class _ProfileState extends State<Profile> {
             content: Form(
               key: _validationkey,
               child: TextFormField(
+                initialValue: initialNumber.toString(),
                 maxLength: 9,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration:
                     textFormFieldDecoration.copyWith(hintText: 'Phone number'),
-                validator: (val) =>
-                    val!.isEmpty ? 'Please enter your phone number.' : null,
+                validator: (val) {
+                  if (val!.isEmpty) {
+                    return 'Please enter your phone number';
+                  }
+                  else if(val.length < 9)
+                  {
+                    return 'Minimum length = 9.';
+                  }
+                  else
+                  {
+                    return null;
+                  }
+                },
                 onChanged: (val) {
                   setState(() => phoneNo = int.parse(val));
                 },
@@ -112,14 +130,9 @@ class _ProfileState extends State<Profile> {
               MaterialButton(
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
-                      dynamic result = await _auth.userPhoneUpdate(phoneNo);
-
-                      if (result == null) {
-                        print('update phone done #createEditPhoneDialog');
-                        Navigator.pop(context);
-                      } else {
-                        print('Something went wrong..');
-                      }
+                      await _auth.userPhoneUpdate(phoneNo);
+                      print('update phone done #createEditPhoneDialog');
+                      Navigator.pop(context);
                     }
                   },
                   child: Text('Confirm')),
@@ -134,7 +147,7 @@ class _ProfileState extends State<Profile> {
   }
 
   // user details address edit dialog
-  void createEditAddressDialog(BuildContext context) {
+  void createEditAddressDialog(BuildContext context, String initialAddress) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -145,6 +158,7 @@ class _ProfileState extends State<Profile> {
               child: TextFormField(
                 maxLength: 100,
                 maxLines: 3,
+                initialValue: initialAddress,
                 decoration:
                     textFormFieldDecoration.copyWith(hintText: 'Address'),
                 validator: (val) =>
@@ -158,14 +172,9 @@ class _ProfileState extends State<Profile> {
               MaterialButton(
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
-                      dynamic result = await _auth.userAddressUpdate(address);
-
-                      if (result == null) {
-                        print('update address done #createEditAddressDialog');
-                        Navigator.pop(context);
-                      } else {
-                        print('Something went wrong..');
-                      }
+                      await _auth.userAddressUpdate(address);
+                      print('update address done #createEditAddressDialog');
+                      Navigator.pop(context);
                     }
                   },
                   child: Text('Confirm')),
@@ -450,7 +459,8 @@ class _ProfileState extends State<Profile> {
                                         child: IconButton(
                                           icon: Icon(Icons.edit),
                                           onPressed: () {
-                                            createEditPhoneDialog(context);
+                                            createEditPhoneDialog(
+                                                context, userMap['phoneNo']);
                                           },
                                         ),
                                       ),
@@ -489,7 +499,8 @@ class _ProfileState extends State<Profile> {
                                           child: IconButton(
                                             icon: Icon(Icons.edit),
                                             onPressed: () {
-                                              createEditAddressDialog(context);
+                                              createEditAddressDialog(
+                                                  context, userMap['address']);
                                             },
                                           ),
                                         ),

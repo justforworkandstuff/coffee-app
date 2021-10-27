@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   //map Firebase User class to model User class
   CustomUser? _userFromFirebase(User? user) {
     return user != null ? CustomUser(userID: user.uid) : null;
@@ -75,24 +75,11 @@ class AuthService {
     }
   }
 
-  //subtracting balance
-  Future userBalanceSubtract(
-      double balance, double price) async {
+  //subtracting balance for orders
+  Future userBalanceSubtract(double balance, double price) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
           .minusBalance(balance, price);
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
-  //return balance after cancelling order
-  Future userBalanceReturn(
-      double balance, double price) async {
-    try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .returnBalance(balance, price);
     } catch (e) {
       print(e.toString());
       return null;
@@ -108,46 +95,37 @@ class AuthService {
       return null;
     }
   }
-  
+
   //adding userImage
-  Future userImageAdd(String image) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).userImageAdd(image);
-    }
-    catch(e)
-    {
+  Future userImageAdd(String image) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .addImage(image);
+    } catch (e) {
       print(e.toString());
       return null;
     }
   }
 
   //updating user phoneNo
-  Future userPhoneUpdate(int phoneNo) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).updatePhoneNo(phoneNo);
-    }
-    catch(e)
-    {
+  Future userPhoneUpdate(int phoneNo) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .updatePhoneNo(phoneNo);
+    } catch (e) {
       print(e.toString());
-      return null; 
+      return null;
     }
   }
 
   //updating user address
-  Future userAddressUpdate(String address) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).updateAddress(address);
-    }
-    catch(e)
-    {
+  Future userAddressUpdate(String address) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .updateAddress(address);
+    } catch (e) {
       print(e.toString());
-      return null; 
+      return null;
     }
   }
 
@@ -167,29 +145,33 @@ class AuthService {
   }
 
   //read order fields
-  Future readFields() async 
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).readFields();
-    }
-    catch (e)
-    {
+  Future readOrderFields() async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid).readOrder();
+    } catch (e) {
       print(e.toString());
       return null;
     }
   }
-  
+
   //delete fields
-  Future deleteFields(String id, String productName, double productPrice, String createdAt) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).deleteFields(
-        id, productName, productPrice, createdAt);
+  Future deleteOrderFields(String id, String productName, double productPrice,
+      String createdAt) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .deleteOrder(id, productName, productPrice, createdAt);
+    } catch (e) {
+      print(e.toString());
+      return null;
     }
-    catch(e)
-    {
+  }
+
+  //subtracts cartAmount after cancelling order
+  Future cartAmountReturn(double productPrice) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .cartSubtraction(productPrice);
+    } catch (e) {
       print(e.toString());
       return null;
     }
@@ -200,27 +182,23 @@ class AuthService {
   /////////////////////////////////////////////////////////////////////////////
 
   //input new product
-  Future addProduct(String productName, double productPrice) async {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).newProductList(productName, productPrice);
-    }
-    catch(e)
-    {
+  Future addProduct(
+      String productName, double productPrice, String image) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .newProduct(productName, productPrice, image);
+    } catch (e) {
       print(e.toString());
       return null;
     }
   }
 
   //delete specific product
-  Future deleteProduct(String docID) async 
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).removeProduct(docID);
-    }
-    catch(e)
-    {
+  Future deleteProduct(String docID) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .removeProduct(docID);
+    } catch (e) {
       print(e.toString());
       return null;
     }
