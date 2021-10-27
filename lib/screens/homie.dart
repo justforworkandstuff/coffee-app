@@ -3,15 +3,10 @@ import 'package:flutter/material.dart';
 
 class HomePagie extends StatelessWidget {
 
-  final Color color;
-
-  HomePagie({required this.color});
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        color: color,
         padding: EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

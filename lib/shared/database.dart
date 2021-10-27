@@ -27,14 +27,7 @@ class DatabaseService {
       await orderList.doc(orderID).set({
         'owner': uid,
         'orders': [],
-        // 'orders': FieldValue.arrayUnion([
-        //   {
-        //     'Product': 'Sample Product',
-        //     'Price': '0.0',
-        //     'ID': 'Sample-ID',
-        //     'Timestamp': '01/01/0000',
-        //   },
-        // ])
+        'cartAmount': 0.0
       });
     });
   }
@@ -75,23 +68,13 @@ class DatabaseService {
     });
   }
 
-  //return balance
-  Future returnBalance(double balance, double price) async {
-    double newBalance = balance + price;
-    double abcde = double.parse(newBalance.toStringAsFixed(2));
-
-    return await userList.doc(uid).update({
-      'balance': abcde,
-    });
-  }
-
   //reading user Lists
   Future readUsers() async {
     return await userList.doc(uid).get();
   }
 
   //add user image
-  Future userImageAdd(String image) async {
+  Future addImage(String image) async {
     return await userList.doc(uid).update({
       'image': image,
     });
@@ -114,6 +97,7 @@ class DatabaseService {
           'Timestamp': DateTime.now().toString().substring(0, 16),
         }
       ]),
+      'cartAmount': FieldValue.increment(productPrice),
     }).then((value) async {
       await userList.doc(uid).update({
         'orders': FieldValue.increment(1),
@@ -122,12 +106,12 @@ class DatabaseService {
   }
 
   //read fields
-  Future readFields() async {
+  Future readOrder() async {
     return await orderList.doc(uid + 'ORDERID').get();
   }
 
   //delete fields
-  Future deleteFields(String id, String productName, double productPrice,
+  Future deleteOrder(String id, String productName, double productPrice,
       String createdAt) async {
     return await orderList.doc(uid + 'ORDERID').update({
       'orders': FieldValue.arrayRemove([
@@ -145,15 +129,22 @@ class DatabaseService {
     });
   }
 
+  //return cartAmount afer cancelling orders
+  Future cartSubtraction(double productPrice) async {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'cartAmount': FieldValue.increment(-productPrice),
+    });
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   /// Products
   ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // admin input new product
-  Future newProductList(String productName, double productPrice) async {
+  Future newProduct(String productName, double productPrice, String image) async {
     return await productList
         .doc()
-        .set({'Product': productName, 'Price': productPrice});
+        .set({'Product': productName, 'Price': productPrice,'image': image});
   }
 
   //admin delete specific product 
