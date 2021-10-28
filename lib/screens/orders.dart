@@ -54,16 +54,54 @@ class _OrdersState extends State<Orders> {
     });
   }
 
+  //checkout
+  void checkOut(BuildContext context, double cartAmount) async {
+    await _auth.cartClearAll(cartAmount);
+    print('Check out successful.');
+    Navigator.pop(context);
+  }
+
+  //cancell all orders
+  void cancelAll(BuildContext context) async
+  {
+    await _auth.cartCancelAll();
+    print('Cancelled all orders successfully');
+    Navigator.pop(context);
+  }
+
+  //confirm dialog
+  void confirmDialog(BuildContext context, double cartAmount, bool isCheckOut) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirm'),
+            content: isCheckOut ? Text('Are you sure you want to check out?') : 
+            Text('Are you sure you want to cancel all orders?'),
+            actions: [
+              MaterialButton(
+                child: Text('Confirm'),
+                onPressed: () => isCheckOut ? checkOut(context, cartAmount) : cancelAll(context),
+              ),
+              MaterialButton(
+                child: Text('Cancel'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<CustomUser?>(context);
+    var _user = Provider.of<CustomUser?>(context);
 
     return loading
         ? Loading()
         : StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Orders')
-                .doc(user!.userID + 'ORDERID')
+                .doc(_user!.userID + 'ORDERID')
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -79,58 +117,87 @@ class _OrdersState extends State<Orders> {
                       .map((value) => value as Map<String, dynamic>)
                       .toList();
 
-              return Container(
-                padding: EdgeInsets.all(25.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      Expanded(
-                        flex: 6,
-                        child: Text(
-                          'Orders',
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Text('Cart Amount: ${something['cartAmount']}'),
-                      ),
-                    ]),
-                    SizedBox(height: 10.0),
-                    Divider(height: 10.0, color: Colors.black),
-                    Expanded(
-                        child: ListView.builder(
-                      itemCount: someList.length,
-                      itemBuilder: (context, index) {
-
-                        final Map<String, String> orderMap = {
-                          'id': someList[index]['ID'] ?? sampleID,
-                          'price': someList[index]['Price'] ?? samplePrice,
-                          'product':  someList[index]['Product'] ?? sampleProduct,
-                          'timestamp': someList[index]['Timestamp'] ?? sampleTime,
-                          'balance': balance.toString(),
-                        };
-
-                        return Padding(
-                          padding: EdgeInsets.only(top: 10.0),
-                          child: Card(
-                            child: ListTile(
-                              onTap: () async {
-                                Navigator.pushNamed(context, '/orderdetails',
-                                    arguments: orderMap).then((_) => manualRefresh());
-                              },
-                              title: Text('Order ID: \n\n ${someList[index]['ID']}'),
-                              subtitle: Text('Ordered: ${someList[index]['Timestamp']}'),
+              return Scaffold(
+                body: Container(
+                  padding: EdgeInsets.all(25.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              flex: 6,
+                              child: Text(
+                                'Orders',
+                                style: TextStyle(
+                                  fontSize: 30.0,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ))
+                            Expanded(
+                              flex: 4,
+                              child: Text(
+                                  'Cart Amount: ${something['cartAmount']}'),
+                            ),
+                          ]),
+                      SizedBox(height: 10.0),
+                      Divider(height: 10.0, color: Colors.black),
+                      Expanded(
+                          child: ListView.builder(
+                        itemCount: someList.length,
+                        itemBuilder: (context, index) {
+                          final Map<String, String> orderMap = {
+                            'id': someList[index]['ID'] ?? sampleID,
+                            'price': someList[index]['Price'] ?? samplePrice,
+                            'product':
+                                someList[index]['Product'] ?? sampleProduct,
+                            'timestamp':
+                                someList[index]['Timestamp'] ?? sampleTime,
+                            'balance': balance.toString(),
+                          };
+
+                          return Padding(
+                            padding: EdgeInsets.only(top: 10.0),
+                            child: Card(
+                              child: ListTile(
+                                onTap: () async {
+                                  Navigator.pushNamed(context, '/orderdetails',
+                                          arguments: orderMap)
+                                      .then((_) => manualRefresh());
+                                },
+                                title: Text(
+                                    'Order ID: \n\n ${someList[index]['ID']}'),
+                                subtitle: Text(
+                                    'Ordered: ${someList[index]['Timestamp']}'),
+                              ),
+                            ),
+                          );
+                        },
+                      ))
+                    ],
+                  ),
+                ),
+                bottomNavigationBar: Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            confirmDialog(context, something['cartAmount'], true);
+                          },
+                          child: Text('Check Out')),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            confirmDialog(context, something['cartAmount'], false);
+                          },
+                          child: Text('Cancel All')),
+                    ),
                   ],
                 ),
               );
@@ -138,4 +205,3 @@ class _OrdersState extends State<Orders> {
           );
   }
 }
-
