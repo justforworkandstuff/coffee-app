@@ -86,7 +86,7 @@ class DatabaseService {
 
   var uuid = Uuid();
 
-  //buy items
+  //place order
   Future placeOrder(String productName, double productPrice) async {
     return await orderList.doc(uid + 'ORDERID').update({
       'orders': FieldValue.arrayUnion([
@@ -105,12 +105,12 @@ class DatabaseService {
     });
   }
 
-  //read fields
+  //read order fields in orderList
   Future readOrder() async {
     return await orderList.doc(uid + 'ORDERID').get();
   }
 
-  //delete fields
+  //delete single order field 
   Future deleteOrder(String id, String productName, double productPrice,
       String createdAt) async {
     return await orderList.doc(uid + 'ORDERID').update({
@@ -133,6 +133,33 @@ class DatabaseService {
   Future cartSubtraction(double productPrice) async {
     return await orderList.doc(uid + 'ORDERID').update({
       'cartAmount': FieldValue.increment(-productPrice),
+    });
+  }
+
+  //check out 
+  Future cartCheckOut(double cartAmount) async 
+  {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'cartAmount': FieldValue.increment(-cartAmount),
+      'orders': [],
+    }).then((value) async {
+      await userList.doc(uid).update({
+        'balance': FieldValue.increment(-cartAmount),
+        'orders': 0,
+      });
+    });
+  }
+
+  //cancel all orders made 
+  Future cartEmptyOrder() async
+  {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'cartAmount': 0.0,
+      'orders': [],
+    }).then((value) async {
+      await userList.doc(uid).update({
+        'orders': 0
+      });
     });
   }
 

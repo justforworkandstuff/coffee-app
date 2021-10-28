@@ -177,6 +177,34 @@ class AuthService {
     }
   }
 
+  //checkout all cart orders and cart amount
+  Future cartClearAll(double cartAmount) async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).cartCheckOut(cartAmount);
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //cancel all cart orders and cart amount
+  Future cartCancelAll() async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).cartEmptyOrder();
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   //Productsssssssssssssssssss
   /////////////////////////////////////////////////////////////////////////////

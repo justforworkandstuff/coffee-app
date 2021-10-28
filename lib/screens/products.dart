@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffeeproject/shared/auth.dart';
+import 'package:coffeeproject/shared/loading.dart';
 import 'package:flutter/material.dart';
 
 class Products extends StatefulWidget {
@@ -13,6 +14,7 @@ class _ProductsState extends State<Products> {
   final _auth = AuthService();
   bool loading = false;
   Map<String, dynamic>? data;
+
   //data to be loaded
   double balance = 0.0;
 
@@ -56,10 +58,9 @@ class _ProductsState extends State<Products> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return loading ? Loading() : StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('Products')
-          .limit(12)
           .snapshots(),
       builder: (context, snapshots) {
         if (!snapshots.hasData) {
