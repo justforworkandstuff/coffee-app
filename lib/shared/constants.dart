@@ -16,3 +16,5 @@ const textFormFieldDecoration = InputDecoration(
     ),
   ),
 );
+
+const List colors = [Colors.red, Colors.blue, Colors.yellow];

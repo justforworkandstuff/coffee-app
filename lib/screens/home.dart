@@ -2,9 +2,9 @@ import 'package:coffeeproject/screens/homie.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/screens/orders.dart';
 import 'package:coffeeproject/screens/products.dart';
-import 'package:coffeeproject/screens/profile.dart';
 import 'package:coffeeproject/screens/testscreen.dart';
 import 'package:coffeeproject/shared/auth.dart';
+import 'package:coffeeproject/shared/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ class _HomeState extends State<Home> {
     HomePagie(),
     Products(),
     Orders(),
-    Profile(),
+    Wrapper(),
     TestScreen(),
   ];
 
