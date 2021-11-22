@@ -11,36 +11,42 @@ class OrderDetails extends StatefulWidget {
 class _OrderDetailsState extends State<OrderDetails> {
   final AuthService _auth = AuthService();
   String? idKey;
+  String? productIDKey;
   String? productKey;
   String? priceKey;
+  String? quantityKey;
   String? createdAtKey;
   String? balanceKey;
 
   //delete order
-  void deleteOrder(String id, String productName, double balance,
-      double productPrice, String createdAt) async {
-    await _auth.deleteOrderFields(id, productName, productPrice, createdAt);
+  void deleteOrder(
+      String id,
+      String productName,
+      double balance,
+      double productPrice,
+      String ordered,
+      int quantity,
+      String productID,
+      bool shipped,
+      bool received, 
+      ) async {
+    await _auth.deleteOrderFields(
+        id, productName, productPrice, ordered, quantity, productID, shipped);
     await _auth.cartAmountReturn(productPrice);
 
     Navigator.pop(context);
     print('Cancel order done. #deleteOrder #orderDetails.dart');
-    // if (result == null && result2 == null) {
-    //   Navigator.pop(context);
-    //   print('Cancel order done.');
-    // } else {
-    //   Fluttertoast.showToast(
-    //       msg: 'Something went wrong. Order is not canceled');
-    //   print('Can\'t cancel order.');
-    // }
   }
 
   @override
   Widget build(BuildContext context) {
     final todo =
-        ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     idKey = todo['id'];
     priceKey = todo['price'];
+    productIDKey = todo['product-ID'];
     productKey = todo['product'];
+    quantityKey = todo['quantity'];
     createdAtKey = todo['timestamp'];
     balanceKey = todo['balance'];
 
@@ -55,11 +61,21 @@ class _OrderDetailsState extends State<OrderDetails> {
               Text('ORDER ID : $idKey'),
               Text('Ordered Item Name : $productKey'),
               Text('Total amount : $priceKey'),
+              Text('Quantity: $quantityKey'),
               Text('Ordered at: $createdAtKey'),
               ElevatedButton(
                 onPressed: () async {
-                  deleteOrder(idKey!, productKey!, double.parse(balanceKey!),
-                      double.parse(priceKey!), createdAtKey!);
+                  deleteOrder(
+                      idKey!,
+                      productKey!,
+                      double.parse(balanceKey!),
+                      double.parse(priceKey!),
+                      createdAtKey!,
+                      int.parse(quantityKey!),
+                      productIDKey!,
+                      false,
+                      false,
+                      );
                 },
                 child: Text('Cancel Order'),
               ),

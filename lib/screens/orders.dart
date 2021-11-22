@@ -17,14 +17,34 @@ class _OrdersState extends State<Orders> {
   Map<String, dynamic>? data;
   var orderList;
   bool loading = false;
+  bool isOrder = true;
+  bool isShipped = false;
+
+  //menu bar
+  int selectedIndex = 0;
+  int theOtherMenu = 1;
+  IconData? icon;
+  String? text;
+
+  //sample details for product
   String sampleID = 'Sample-ID';
+  String sampleProductID = 'Sample-Product-ID';
   String sampleProduct = 'Sample Product';
   String samplePrice = '0.0';
+  String sampleQuantity = '0';
   String sampleTime = '01/01/0000';
   double balance = 0.0;
 
+  //checkout stuff
+  List<Map<String, dynamic>> checkOutCart = [];
+
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
+
+  //when clicked, swap to orders/shipping
+  void showShipping() {
+    setState(() => isOrder = !isOrder);
+  }
 
   //to get the balance of the user and pass to orderDetails
   @override
@@ -42,46 +62,38 @@ class _OrdersState extends State<Orders> {
   }
 
   //manual refresh
-  void manualRefresh() {
-    setState(() => loading = true);
-    _auth.userItemRead().then((value) {
-      data = value.data();
-      setState(() {
-        loading = false;
-        balance = data!['balance'];
-        print('Manual refresh balance done #manualRefresh #orders.dart');
-      });
-    });
-  }
+  // void manualRefresh() {
+  //   setState(() => loading = true);
+  //   _auth.userItemRead().then((value) {
+  //     data = value.data();
+  //     setState(() {
+  //       loading = false;
+  //       balance = data!['balance'];
+  //       print('Manual refresh balance done #manualRefresh #orders.dart');
+  //     });
+  //   });
+  // }
 
   //checkout
-  void checkOut(BuildContext context, double cartAmount) async {
-    await _auth.cartClearAll(cartAmount);
+  void checkOut(BuildContext context, double cartAmount,
+      List<Map<String, dynamic>> finalOrderList) async {
+    await _auth.cartCheckOutAll(cartAmount, finalOrderList);
     print('Check out successful.');
     Navigator.pop(context);
   }
 
-  //cancell all orders
-  void cancelAll(BuildContext context) async
-  {
-    await _auth.cartCancelAll();
-    print('Cancelled all orders successfully');
-    Navigator.pop(context);
-  }
-
   //confirm dialog
-  void confirmDialog(BuildContext context, double cartAmount, bool isCheckOut) {
+  void confirmDialog(BuildContext context, double cartAmount) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Confirm'),
-            content: isCheckOut ? Text('Are you sure you want to check out?') : 
-            Text('Are you sure you want to cancel all orders?'),
+            content: Text('Are you sure you want to check out?'),
             actions: [
               MaterialButton(
                 child: Text('Confirm'),
-                onPressed: () => isCheckOut ? checkOut(context, cartAmount) : cancelAll(context),
+                onPressed: () => checkOut(context, cartAmount, checkOutCart),
               ),
               MaterialButton(
                 child: Text('Cancel'),
@@ -95,6 +107,7 @@ class _OrdersState extends State<Orders> {
   @override
   Widget build(BuildContext context) {
     var _user = Provider.of<CustomUser?>(context);
+    Size _size = MediaQuery.of(context).size;
 
     return loading
         ? Loading()
@@ -108,98 +121,256 @@ class _OrdersState extends State<Orders> {
                 return CircularProgressIndicator();
               }
 
-              final DocumentSnapshot? something = snapshot.data;
-              final Map<String, dynamic> abc =
-                  something!.data() as Map<String, dynamic>;
+              final DocumentSnapshot? dataSnapshot = snapshot.data;
+              final Map<String, dynamic> dataMap =
+                  dataSnapshot!.data() as Map<String, dynamic>;
 
-              final List<Map<String, dynamic>> someList =
-                  (abc['orders'] as List)
+              //orders
+              final List<Map<String, dynamic>> orderList =
+                  (dataMap['cart'] as List)
                       .map((value) => value as Map<String, dynamic>)
                       .toList();
+              checkOutCart = orderList;
+              print(checkOutCart[0]['Price']);
+
+              //shipments
+              final List<Map<String, dynamic>> shipmentList =
+                  (dataMap['shipment'] as List)
+                      .map((e) => e as Map<String, dynamic>)
+                      .toList();
+
+              // List<Widget> menuList = [
+              //   CartItem(Icons.shopping_cart, 'Cart', orderList, balance),
+              //   ShipItem(
+              //       Icons.local_shipping, 'Shipment', shipmentList, isShipped),
+              // ];
 
               return Scaffold(
                 body: Container(
-                  padding: EdgeInsets.all(25.0),
+                  height: _size.height,
+                  padding: EdgeInsets.symmetric(horizontal: 25.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      //top menu stuffs
                       Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              flex: 6,
-                              child: Text(
-                                'Orders',
-                                style: TextStyle(
-                                  fontSize: 30.0,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() => isOrder = true);
+                              },
+                              child: Container(
+                                height: 50.0,
+                                width: _size.width,
+                                child: Container(
+                                  height: 40.0,
+                                  width: 120.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.pink,
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(25.0),
+                                      bottomRight: Radius.circular(25.0),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.shopping_cart),
+                                      SizedBox(width: 10.0),
+                                      Text('Cart'),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                            Expanded(
-                              flex: 4,
-                              child: Text(
-                                  'Cart Amount: ${something['cartAmount']}'),
-                            ),
-                          ]),
-                      SizedBox(height: 10.0),
-                      Divider(height: 10.0, color: Colors.black),
-                      Expanded(
-                          child: ListView.builder(
-                        itemCount: someList.length,
-                        itemBuilder: (context, index) {
-                          final Map<String, String> orderMap = {
-                            'id': someList[index]['ID'] ?? sampleID,
-                            'price': someList[index]['Price'] ?? samplePrice,
-                            'product':
-                                someList[index]['Product'] ?? sampleProduct,
-                            'timestamp':
-                                someList[index]['Timestamp'] ?? sampleTime,
-                            'balance': balance.toString(),
-                          };
-
-                          return Padding(
-                            padding: EdgeInsets.only(top: 10.0),
-                            child: Card(
-                              child: ListTile(
-                                onTap: () async {
-                                  Navigator.pushNamed(context, '/orderdetails',
-                                          arguments: orderMap)
-                                      .then((_) => manualRefresh());
-                                },
-                                title: Text(
-                                    'Order ID: \n\n ${someList[index]['ID']}'),
-                                subtitle: Text(
-                                    'Ordered: ${someList[index]['Timestamp']}'),
+                          ),
+                          Expanded(
+                            flex: 5,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() => isOrder = false);
+                              },
+                              child: Container(
+                                height: 50.0,
+                                width: _size.width,
+                                child: Container(
+                                  height: 40.0,
+                                  width: 120.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.pink,
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(25.0),
+                                      bottomRight: Radius.circular(25.0),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.local_shipping),
+                                      SizedBox(width: 10.0),
+                                      Text('Shipment'),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          );
-                        },
-                      ))
+                          ),
+                        ],
+                      ),
+
+                      /*
+                            Expanded(
+                              flex: 1,
+                              child: IconButton(
+                                icon: Icon(Icons.switch_camera),
+                                onPressed: () => showShipping(),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 5,
+                              child: isOrder
+                                  ? Text(
+                                      'Orders',
+                                      style: TextStyle(
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Shipment',
+                                      style: TextStyle(
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: isOrder
+                                  ? Text(
+                                      'Cart Amount: ${dataSnapshot['cartAmount']}')
+                                  : Text(''),
+                            ),*/
+                      //   ],
+                      // ),
+
+                      SizedBox(height: 10.0),
+                      Divider(height: 10.0, color: Colors.black),
+
+                      //order cards
+                      Expanded(
+                        child: isOrder
+                            ? ListView.builder(
+                                itemCount: orderList.length,
+                                itemBuilder: (context, index) {
+                                  final Map<String, String> orderMap = {
+                                    'id': orderList[index]['ID'] ?? sampleID,
+                                    'price': orderList[index]['Price'] ??
+                                        samplePrice,
+                                    'product-ID': orderList[index]
+                                            ['Product-ID'] ??
+                                        sampleProductID,
+                                    'product': orderList[index]['Product'] ??
+                                        sampleProduct,
+                                    'quantity': orderList[index]['Quantity'] ??
+                                        sampleQuantity,
+                                    'timestamp': orderList[index]['Ordered'] ??
+                                        sampleTime,
+                                    'balance': balance.toString(),
+                                  };
+
+                                  return Padding(
+                                    padding: EdgeInsets.only(top: 10.0),
+                                    child: Card(
+                                      child: ListTile(
+                                        onTap: () async {
+                                          Navigator.pushNamed(
+                                                  context, '/orderdetails',
+                                                  arguments: orderMap);
+                                              // .then((_) => manualRefresh());
+                                        },
+                                        title: Text(
+                                            'Order ID: \n\n ${orderList[index]['ID']}\n'),
+                                        subtitle: Text(
+                                            'Ordered: ${orderList[index]['Ordered']}'),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            : ListView.builder(
+                                itemCount: shipmentList.length,
+                                itemBuilder: (context, index) {
+                                  final Map<String, String> shipMap = {
+                                    'id': shipmentList[index]['ID'] ?? sampleID,
+                                    'price': shipmentList[index]['Price'] ??
+                                        samplePrice,
+                                    'product-ID': shipmentList[index]
+                                            ['Product-ID'] ??
+                                        sampleProductID,
+                                    'product': shipmentList[index]['Product'] ??
+                                        sampleProduct,
+                                    'quantity': shipmentList[index]
+                                            ['Quantity'] ??
+                                        sampleQuantity,
+                                    'status': shipmentList[index]['Shipped'].toString(),
+                                  };
+
+                                  isShipped = shipmentList[index]['Shipped'];
+
+                                  return Padding(
+                                    padding: EdgeInsets.only(top: 10.0),
+                                    child: Card(
+                                      child: ListTile(
+                                          onTap: () async {
+                                            Navigator.pushNamed(
+                                                    context, '/shipmentdetails',
+                                                    arguments: shipMap);
+                                                // .then((_) => manualRefresh());
+                                          },
+                                          title: Text(
+                                              'Shipment ID: \n\n ${shipmentList[index]['ID']}\n'),
+                                          subtitle: isShipped
+                                              ? Text(
+                                                  'Shipped: Already shipped, please confirm.',
+                                                  style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )
+                                              : Text(
+                                                  'Shipped: Not shipped',
+                                                  style: TextStyle(
+                                                      color: Colors.red, 
+                                                      fontWeight: FontWeight.bold),
+                                                )),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
                     ],
                   ),
                 ),
-                bottomNavigationBar: Row(
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            confirmDialog(context, something['cartAmount'], true);
-                          },
-                          child: Text('Check Out')),
-                    ),
-                    Expanded(
-                      flex: 5,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            confirmDialog(context, something['cartAmount'], false);
-                          },
-                          child: Text('Cancel All')),
-                    ),
-                  ],
-                ),
+                bottomNavigationBar: isOrder
+                    ? Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  confirmDialog(
+                                      context, dataSnapshot['cartAmount']);
+                                },
+                                child: Text('Check Out')),
+                          ),
+                        ],
+                      )
+                    : null,
               );
             },
           );

@@ -99,8 +99,7 @@ class AuthService {
   //adding userImage
   Future userImageAdd(String image) async {
     try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .addImage(image);
+      return await DatabaseService(uid: _auth.currentUser!.uid).addImage(image);
     } catch (e) {
       print(e.toString());
       return null;
@@ -134,10 +133,11 @@ class AuthService {
   ////////////////////////////////////////////////////////////////////////////////////
 
   //buying order items
-  Future makeOrder(String productName, double productPrice) async {
+  Future makeOrder(String productName, double productPrice, int quantity,
+      String productID, bool shipped) async {
     try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .placeOrder(productName, productPrice);
+      return await DatabaseService(uid: _auth.currentUser!.uid).placeOrder(
+          productName, productPrice, quantity, productID, shipped);
     } catch (e) {
       print(e.toString());
       return null;
@@ -154,12 +154,37 @@ class AuthService {
     }
   }
 
-  //delete fields
-  Future deleteOrderFields(String id, String productName, double productPrice,
-      String createdAt) async {
+  //delete order
+  Future deleteOrderFields(
+      String id,
+      String productName,
+      double productPrice,
+      String ordered,
+      int quantity,
+      String productID,
+      bool shipped,
+      ) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid).deleteOrder(
+          id,
+          productName,
+          productPrice,
+          ordered,
+          quantity,
+          productID,
+          shipped,
+          );
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //received item
+  Future receivedShipmentFields(bool shipped) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .deleteOrder(id, productName, productPrice, createdAt);
+          .receivedShipment(shipped);
     } catch (e) {
       print(e.toString());
       return null;
@@ -178,28 +203,12 @@ class AuthService {
   }
 
   //checkout all cart orders and cart amount
-  Future cartClearAll(double cartAmount) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).cartCheckOut(cartAmount);
-    }
-    catch(e)
-    {
-      print(e.toString());
-      return null;
-    }
-  }
-
-  //cancel all cart orders and cart amount
-  Future cartCancelAll() async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).cartEmptyOrder();
-    }
-    catch(e)
-    {
+  Future cartCheckOutAll(
+      double cartAmount, List<Map<String, dynamic>> cartList) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .cartCheckOut(cartAmount, cartList);
+    } catch (e) {
       print(e.toString());
       return null;
     }

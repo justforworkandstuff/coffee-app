@@ -1,6 +1,8 @@
 import 'package:coffeeproject/screens/delivery.dart';
 import 'package:coffeeproject/screens/home.dart';
 import 'package:coffeeproject/screens/orderdetails.dart';
+import 'package:coffeeproject/screens/productdetails.dart';
+import 'package:coffeeproject/screens/shipmentdetails.dart';
 import 'package:coffeeproject/screens/signin.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,8 @@ class MyApp extends StatelessWidget {
             '/purchaseDelivery': (context) => const Delivery(),
             '/signin': (context) => const SignIn(),
             '/orderdetails': (context) => const OrderDetails(),
+            '/productdetails': (context) => const ProductDetails(),
+            '/shipmentdetails': (context) => const ShipmentDetails(),
           },
           debugShowCheckedModeBanner: false,
           title: 'Sample CoffeeApp Demo',
