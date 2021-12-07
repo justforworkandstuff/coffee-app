@@ -19,6 +19,7 @@ class _OrdersState extends State<Orders> {
   bool loading = false;
   bool isOrder = true;
   bool isShipped = false;
+  String userAddress = '';
 
   //menu bar
   int selectedIndex = 0;
@@ -56,6 +57,7 @@ class _OrdersState extends State<Orders> {
       setState(() {
         loading = false;
         balance = data!['balance'];
+        userAddress = data!['address'];
         print('Initial read balance done #initState #orders.dart');
       });
     });
@@ -89,7 +91,19 @@ class _OrdersState extends State<Orders> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Confirm'),
-            content: Text('Are you sure you want to check out?'),
+            content: Container(
+              height: 100.0,
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                        'Your delivery address is: \n$userAddress\nAre you sure you want to check out?',
+                        maxLines: 5,),
+                  ),
+                  // Center(child: Text('Are you sure you want to check out?')),
+                ],
+              ),
+            ),
             actions: [
               MaterialButton(
                 child: Text('Confirm'),
@@ -131,7 +145,6 @@ class _OrdersState extends State<Orders> {
                       .map((value) => value as Map<String, dynamic>)
                       .toList();
               checkOutCart = orderList;
-              print(checkOutCart[0]['Price']);
 
               //shipments
               final List<Map<String, dynamic>> shipmentList =
@@ -220,44 +233,10 @@ class _OrdersState extends State<Orders> {
                         ],
                       ),
 
-                      /*
-                            Expanded(
-                              flex: 1,
-                              child: IconButton(
-                                icon: Icon(Icons.switch_camera),
-                                onPressed: () => showShipping(),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 5,
-                              child: isOrder
-                                  ? Text(
-                                      'Orders',
-                                      style: TextStyle(
-                                        fontSize: 30.0,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Shipment',
-                                      style: TextStyle(
-                                        fontSize: 30.0,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: isOrder
-                                  ? Text(
-                                      'Cart Amount: ${dataSnapshot['cartAmount']}')
-                                  : Text(''),
-                            ),*/
-                      //   ],
-                      // ),
-
+                      SizedBox(height: 15.0),
+                      Text(isOrder
+                          ? 'Cart Amount: ${dataSnapshot['cartAmount']}'
+                          : ''),
                       SizedBox(height: 10.0),
                       Divider(height: 10.0, color: Colors.black),
 
@@ -289,9 +268,9 @@ class _OrdersState extends State<Orders> {
                                       child: ListTile(
                                         onTap: () async {
                                           Navigator.pushNamed(
-                                                  context, '/orderdetails',
-                                                  arguments: orderMap);
-                                              // .then((_) => manualRefresh());
+                                              context, '/orderdetails',
+                                              arguments: orderMap);
+                                          // .then((_) => manualRefresh());
                                         },
                                         title: Text(
                                             'Order ID: \n\n ${orderList[index]['ID']}\n'),
@@ -317,7 +296,9 @@ class _OrdersState extends State<Orders> {
                                     'quantity': shipmentList[index]
                                             ['Quantity'] ??
                                         sampleQuantity,
-                                    'status': shipmentList[index]['Shipped'].toString(),
+                                    'status': shipmentList[index]['Shipped']
+                                        .toString(),
+                                    'ordered': shipmentList[index]['Ordered'],
                                   };
 
                                   isShipped = shipmentList[index]['Shipped'];
@@ -328,9 +309,9 @@ class _OrdersState extends State<Orders> {
                                       child: ListTile(
                                           onTap: () async {
                                             Navigator.pushNamed(
-                                                    context, '/shipmentdetails',
-                                                    arguments: shipMap);
-                                                // .then((_) => manualRefresh());
+                                                context, '/shipmentdetails',
+                                                arguments: shipMap);
+                                            // .then((_) => manualRefresh());
                                           },
                                           title: Text(
                                               'Shipment ID: \n\n ${shipmentList[index]['ID']}\n'),
@@ -345,8 +326,9 @@ class _OrdersState extends State<Orders> {
                                               : Text(
                                                   'Shipped: Not shipped',
                                                   style: TextStyle(
-                                                      color: Colors.red, 
-                                                      fontWeight: FontWeight.bold),
+                                                      color: Colors.red,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 )),
                                     ),
                                   );
@@ -361,12 +343,15 @@ class _OrdersState extends State<Orders> {
                         children: [
                           Expanded(
                             flex: 5,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  confirmDialog(
-                                      context, dataSnapshot['cartAmount']);
-                                },
-                                child: Text('Check Out')),
+                            child: dataSnapshot['cartAmount'] != 0.0
+                                ? ElevatedButton(
+                                    onPressed: () {
+                                      confirmDialog(
+                                          context, dataSnapshot['cartAmount']);
+                                    },
+                                    child: Text('Check Out'))
+                                : ElevatedButton(
+                                    onPressed: null, child: Text('Check Out')),
                           ),
                         ],
                       )

@@ -17,8 +17,8 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
   String? quantityKey;
   String? shipmentKey;
   String? statusKey;
+  String? orderedKey;
 
-  String shipmentError = '';
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +30,14 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
     productKey = todo['product'];
     quantityKey = todo['quantity'];
     statusKey = todo['status'];
+    orderedKey = todo['ordered'];
 
     //received order
-    void receivedOrder(bool shipped, bool received) async {
-      if (statusKey == 'false') {
-        setState(() => shipmentError = 'Error. The item is not shipped yet.');
-        print('$shipmentError #shipmentdetails.dart');
-      } else {
-        await _auth.receivedShipmentFields(shipped);
+    void receivedOrder(String productID, String productName,
+        double productPrice, String id, int quantity, String ordered) async {
+      if (statusKey == 'true') {
+        await _auth.receivedShipmentFields(
+            productID, productName, productPrice, id, quantity, ordered);
 
         Navigator.pop(context);
         print('Received shipment done. #receivedOrder #shipmentdetails.dart');
@@ -54,9 +54,11 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('SHIPMENT ID : $idKey'),
+                Text('Product ID: $productIDKey'),
                 Text('Ordered Item Name : $productKey'),
                 Text('Total amount : $priceKey'),
                 Text('Quantity: $quantityKey'),
+                Text('Ordered: $orderedKey'),
                 Text(
                     statusKey == 'true'
                         ? 'Shipped status: Already shipped, please confirm.'
@@ -73,12 +75,6 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
                             fontSize: 15.0,
                           )),
                 SizedBox(height: 15.0),
-                Text(shipmentError,
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25.0,
-                    )),
               ],
             ),
           ),
@@ -86,12 +82,24 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
         bottomNavigationBar: Row(
           children: [
             Expanded(
-              child: ElevatedButton(
-                onPressed: () async {
-                  receivedOrder(true, true);
-                },
-                child: Text('Confirm Received Shipment'),
-              ),
+              child: statusKey.toString() == 'true'
+                  ? ElevatedButton(
+                      onPressed: () async {
+                        receivedOrder(
+                          productIDKey!,
+                          productKey!,
+                          double.parse(priceKey!),
+                          idKey!,
+                          int.parse(quantityKey!),
+                          orderedKey!,
+                        );
+                      },
+                      child: Text('Confirm Received Shipment'),
+                    )
+                  : ElevatedButton(
+                      onPressed: null,
+                      child: Text('Confirm Received Shipment'),
+                    ),
             ),
           ],
         ),

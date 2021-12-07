@@ -92,7 +92,6 @@ class DatabaseService {
               'ID': uuid.v4(),
               'Quantity': quantity.toString(),
               'Ordered': DateTime.now().toString().substring(0, 16),
-              'Delivered': '',
               'Shipped': shipped,
             }
           ]),
@@ -127,9 +126,8 @@ class DatabaseService {
               'ID': id,
               'Quantity': quantity.toString(),
               'Ordered': ordered,
-              'Delivered': '',
               'Shipped': shipped,
-                          }
+            }
           ]),
         })
         .whenComplete(() => productList.doc(productID).update({
@@ -142,18 +140,35 @@ class DatabaseService {
         });
   }
 
-  //received item 
-  Future receivedShipment(bool shipped) async {
-    return await orderList
-        .doc(uid + 'ORDERID')
-        .update({
-          'shipment': FieldValue.arrayUnion([
-            {
-              'Delivered': DateTime.now().toString().substring(0, 16),
-              'Shipped': shipped,
-            }
-          ]),
-        });
+  //received item
+  Future receivedShipment(String productID, String productName,
+      double productPrice, String id, int quantity, String ordered) async {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'history': FieldValue.arrayUnion([
+        {
+          'Product-ID': productID,
+          'Product': productName,
+          'Price': productPrice.toString(),
+          'ID': id,
+          'Quantity': quantity.toString(),
+          'Received': DateTime.now().toString().substring(0, 16),
+        }
+      ]),
+    }).then((value) async {
+      await orderList.doc(uid + 'ORDERID').update({
+        'shipment': FieldValue.arrayRemove([
+          {
+            'ID': id,
+            'Ordered': ordered,
+            'Price': productPrice.toString(),
+            'Product': productName,
+            'Product-ID': productID,
+            'Quantity': quantity.toString(),
+            'Shipped': true,
+          }
+        ]),
+      });
+    });
   }
 
   //return cartAmount afer cancelling orders
@@ -164,11 +179,12 @@ class DatabaseService {
   }
 
   //check out cart orders
-  Future cartCheckOut(double cartAmount, List<Map<String, dynamic>> cartList) async {
+  Future cartCheckOut(
+      double cartAmount, List<Map<String, dynamic>> cartList) async {
     return await orderList.doc(uid + 'ORDERID').update({
       'cartAmount': FieldValue.increment(-cartAmount),
       'cart': [],
-      'shipment': FieldValue.arrayUnion(cartList), 
+      'shipment': FieldValue.arrayUnion(cartList),
     }).then((value) async {
       await userList.doc(uid).update({
         'balance': FieldValue.increment(-cartAmount),
