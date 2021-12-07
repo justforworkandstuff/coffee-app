@@ -181,10 +181,11 @@ class AuthService {
   }
 
   //received item
-  Future receivedShipmentFields(bool shipped) async {
+  Future receivedShipmentFields(String productID, String productName, double productPrice,
+  String id, int quantity, String ordered) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .receivedShipment(shipped);
+          .receivedShipment(productID, productName, productPrice, id, quantity, ordered);
     } catch (e) {
       print(e.toString());
       return null;

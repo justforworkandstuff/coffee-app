@@ -128,10 +128,6 @@ class _SignInState extends State<SignIn> {
     return loading
         ? Loading()
         : Scaffold(
-            appBar: AppBar(
-                title: Text(screenTitle == true
-                    ? screenText = 'Sign In'
-                    : screenText = 'Register')),
             body: Padding(
               padding: const EdgeInsets.all(15.0),
               child: SingleChildScrollView(
@@ -139,23 +135,35 @@ class _SignInState extends State<SignIn> {
                   child: Form(
                     key: _formKey,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Visibility(
-                          visible: toggleRegister,
-                          child: InkWell(
-                            onTap: () {
-                              _showPickedOptionsDialog(context);
-                            },
-                            child: CircleAvatar(
-                              radius: 50.0,
-                              backgroundColor: Colors.white,
-                              child: ClipOval(
-                                  child: image != null
-                                      ? Image.file(
-                                          image!,
-                                          fit: BoxFit.fill,
-                                        )
-                                      : Image.asset('assets/useravatar.png')),
+                        Text(
+                          screenTitle == true
+                              ? screenText = 'Sign In'
+                              : screenText = 'Register',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25.0,
+                          ),
+                        ),
+                        Center(
+                          child: Visibility(
+                            visible: toggleRegister,
+                            child: InkWell(
+                              onTap: () {
+                                _showPickedOptionsDialog(context);
+                              },
+                              child: CircleAvatar(
+                                radius: 50.0,
+                                backgroundColor: Colors.white,
+                                child: ClipOval(
+                                    child: image != null
+                                        ? Image.file(
+                                            image!,
+                                            fit: BoxFit.fill,
+                                          )
+                                        : Image.asset('assets/useravatar.png')),
+                              ),
                             ),
                           ),
                         ),
@@ -288,108 +296,116 @@ class _SignInState extends State<SignIn> {
                           ),
                         ),
                         SizedBox(height: 15.0),
-                        Visibility(
-                          visible: toggleSignIn,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                setState(() => loading = true);
-                                dynamic result =
-                                    await _auth.userSignIn(email, password);
-                                if (result == null) {
-                                  setState(() {
-                                    error = 'Please enter a valid email.';
-                                    loading = false;
-                                  });
-                                } else {
-                                  Fluttertoast.showToast(
-                                    msg: 'Login succssfully.',
-                                    gravity: ToastGravity.BOTTOM,
-                                  );
-                                  setState(() => loading = false);
+                        Center(
+                          child: Visibility(
+                            visible: toggleSignIn,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() => loading = true);
+                                  dynamic result =
+                                      await _auth.userSignIn(email, password);
+                                  if (result == null) {
+                                    setState(() {
+                                      error = 'Please enter a valid email.';
+                                      loading = false;
+                                    });
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Login succssfully.',
+                                      gravity: ToastGravity.BOTTOM,
+                                    );
+                                    setState(() => loading = false);
+                                  }
                                 }
-                              }
-                            },
-                            child: Text('Log in'),
+                              },
+                              child: Text('Log in'),
+                            ),
                           ),
                         ),
-                        Visibility(
-                          visible: toggleRegister,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                setState(() => loading = true);
-                                dynamic result = await _auth.userRegister(
-                                    email,
-                                    password,
-                                    address,
-                                    orders,
-                                    userName,
-                                    phoneNo,
-                                    '');
-                                dynamic result2 = await uploadFile(image!);
-                                if (result == null && result2 == null) {
-                                  setState(() {
-                                    error =
-                                        'Please enter a valid email./Email has already been used!';
-                                    loading = false;
-                                  });
-                                } else {
-                                  setState(() => loading = false);
-                                  Fluttertoast.showToast(
-                                    msg: 'Register succssfully.',
-                                    gravity: ToastGravity.BOTTOM,
-                                  );
+                        Center(
+                          child: Visibility(
+                            visible: toggleRegister,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() => loading = true);
+                                  dynamic result = await _auth.userRegister(
+                                      email,
+                                      password,
+                                      address,
+                                      orders,
+                                      userName,
+                                      phoneNo,
+                                      '');
+                                  dynamic result2 = await uploadFile(image!);
+                                  if (result == null && result2 == null) {
+                                    setState(() {
+                                      error =
+                                          'Please enter a valid email./Email has already been used!';
+                                      loading = false;
+                                    });
+                                  } else {
+                                    setState(() => loading = false);
+                                    Fluttertoast.showToast(
+                                      msg: 'Register succssfully.',
+                                      gravity: ToastGravity.BOTTOM,
+                                    );
+                                  }
                                 }
-                              }
-                            },
-                            child: Text('Register'),
+                              },
+                              child: Text('Register'),
+                            ),
                           ),
                         ),
                         SizedBox(height: 15.0),
-                        Visibility(
-                          visible: toggleSignIn,
-                          child: GestureDetector(
-                            onTap: () {
-                              showRegister();
-                              clearFields();
-                            },
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'Don\'t have an account yet? ',
-                                style: TextStyle(color: Colors.black),
-                                children: [
-                                  TextSpan(
-                                      text: 'Click here',
-                                      style: TextStyle(
-                                        color: Colors.blueAccent[700],
-                                      )),
-                                ],
+                        Center(
+                          child: Visibility(
+                            visible: toggleSignIn,
+                            child: GestureDetector(
+                              onTap: () {
+                                showRegister();
+                                clearFields();
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'Don\'t have an account yet? ',
+                                  style: TextStyle(color: Colors.black),
+                                  children: [
+                                    TextSpan(
+                                        text: 'Click here',
+                                        style: TextStyle(
+                                          color: Colors.blueAccent[700],
+                                        )),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        Visibility(
-                          visible: toggleRegister,
-                          child: GestureDetector(
-                            onTap: () {
-                              showRegister();
-                              clearFields();
-                            },
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'Already have an account? ',
-                                style: TextStyle(color: Colors.black),
-                                children: [
-                                  TextSpan(
-                                      text: 'Click here',
-                                      style: TextStyle(
-                                        color: Colors.blue[400],
-                                      )),
-                                ],
+                        Center(
+                          child: Visibility(
+                            visible: toggleRegister,
+                            child: GestureDetector(
+                              onTap: () {
+                                showRegister();
+                                clearFields();
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'Already have an account? ',
+                                  style: TextStyle(color: Colors.black),
+                                  children: [
+                                    TextSpan(
+                                        text: 'Click here',
+                                        style: TextStyle(
+                                          color: Colors.blue[400],
+                                        )),
+                                  ],
+                                ),
                               ),
+                              // Text('Already have an account? Click here'),
                             ),
-                            // Text('Already have an account? Click here'),
                           ),
                         ),
                         SizedBox(height: 15.0),
