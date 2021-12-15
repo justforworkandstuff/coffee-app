@@ -1,72 +1,213 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffeeproject/reusables/orderselection.dart';
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
-class HomePagie extends StatelessWidget {
+class HomePagie extends StatefulWidget {
+  const HomePagie({Key? key}) : super(key: key);
+
+  @override
+  _HomePagieState createState() => _HomePagieState();
+}
+
+class _HomePagieState extends State<HomePagie> {
+  //variables
+  int selectedIndex = 0;
+  final carouselController = CarouselController();
+  List<dynamic> sliderList = [];
+
+  Widget buildImageCard(String urlImage, int index, String product,
+          int quantity, String productID, double price) =>
+      Container(
+        color: Colors.grey,
+        margin: EdgeInsets.symmetric(horizontal: 12.0),
+        child: Card(
+          child: InkWell(
+            onTap: () {
+              final Map<String, String> productDetailsMap = {
+                'image': urlImage,
+                'product': product,
+                'price': price.toString(),
+                'inventory': quantity.toString(),
+                'ID': productID,
+              };
+
+              Navigator.pushNamed(context, '/productdetails',
+                  arguments: productDetailsMap);
+            },
+            child: Card(
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 9,
+                    child: Image(
+                      image: NetworkImage(urlImage),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text('$product+$index'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Order Now'),
-            SizedBox(height: 15.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Products')
+          .limit(3)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return CircularProgressIndicator();
+        }
+
+        sliderList = snapshot.data!.docs.toList();
+
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/signin');
-                      // Navigator.pushReplacementNamed(context, '/signin');
-                    },
-                    child: OrderCards(img: 'assets/123.jpg', text: 'QR Order'),
-                  ),
+                Text('Order Now'),
+                SizedBox(height: 15.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/signin');
+                          // Navigator.pushReplacementNamed(context, '/signin');
+                        },
+                        child:
+                            OrderCards(img: 'assets/123.jpg', text: 'QR Order'),
+                      ),
+                    ),
+                    Expanded(
+                      child: OrderCards(img: 'assets/333.jpg', text: 'Pickup'),
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/delivery');
+                        },
+                        child:
+                            OrderCards(img: 'assets/555.jpg', text: 'Delivery'),
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: OrderCards(img: 'assets/333.jpg', text: 'Pickup'),
+                SizedBox(height: 25.0),
+                Text('What\'s New'),
+                SizedBox(height: 15.0),
+                Column(
+                  children: [
+                    //carousel slider and buttons
+                    Row(
+                      children: [
+                        //left button
+                        Expanded(
+                          flex: 1,
+                          child: ElevatedButton(
+                            onPressed: () => carouselController.previousPage(),
+                            child: Icon(Icons.arrow_left),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 8,
+                          child: CarouselSlider.builder(
+                            carouselController: carouselController,
+                            itemCount: snapshot.data!.docs.length,
+                            options: CarouselOptions(
+                              height: 200.0,
+                              autoPlay: true,
+                              enlargeCenterPage: true,
+                              viewportFraction: 1,
+                              autoPlayInterval: Duration(seconds: 3),
+                              onPageChanged: (index, reason) =>
+                                  setState(() => selectedIndex = index),
+                            ),
+                            itemBuilder: (context, itemIndex, pageViewIndex) {
+                              final image =
+                                  snapshot.data!.docs[itemIndex].get('image');
+                              final product =
+                                  snapshot.data!.docs[itemIndex].get('Product');
+                              final quantity = snapshot.data!.docs[itemIndex]
+                                  .get('inventory');
+                              final productID =
+                                  snapshot.data!.docs[itemIndex].id;
+                              final price =
+                                  snapshot.data!.docs[itemIndex].get('Price');
+
+                              return buildImageCard(image, itemIndex, product,
+                                  quantity, productID, price);
+                            },
+                          ),
+                        ),
+                        //right button
+                        Expanded(
+                          flex: 1,
+                          child: ElevatedButton(
+                            onPressed: () => carouselController.nextPage(),
+                            child: Icon(Icons.arrow_right),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 25.0),
+                    //dots indicator
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: sliderList.map(
+                        (image) {
+                          int index = sliderList.indexOf(image);
+                          return InkWell(
+                            onTap: () =>
+                                carouselController.animateToPage(index),
+                            child: Container(
+                              width: 8.0,
+                              height: 8.0,
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 2.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: selectedIndex == index
+                                    ? Colors.red
+                                    : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/delivery');
-                    },
-                    child: OrderCards(img: 'assets/555.jpg', text: 'Delivery'),
+                SizedBox(height: 25.0),
+                Text('Invite Friends'),
+                SizedBox(height: 15.0),
+                Container(
+                  height: 150.0,
+                  child: Card(
+                    elevation: 5.0,
+                    child: Image(
+                      image: AssetImage('assets/invite.webp'),
+                      fit: BoxFit.scaleDown,
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 25.0),
-            Text('Invite Friends'),
-            SizedBox(height: 15.0),
-            Container(
-              height: 150.0,
-              child: Card(
-                elevation: 5.0,
-                child: Image(
-                  image: AssetImage('assets/invite.webp'),
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-            SizedBox(height: 25.0),
-            Text('Whats New'),
-            SizedBox(height: 15.0),
-            Container(
-              height: 150.0,
-              child: Card(
-                elevation: 5.0,
-                child: Image(
-                  image: AssetImage('assets/new.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
