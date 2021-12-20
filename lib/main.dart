@@ -1,4 +1,5 @@
 import 'package:coffeeproject/screens/delivery.dart';
+import 'package:coffeeproject/screens/historydetails.dart';
 import 'package:coffeeproject/screens/home.dart';
 import 'package:coffeeproject/screens/orderdetails.dart';
 import 'package:coffeeproject/screens/productdetails.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
             '/orderdetails': (context) => const OrderDetails(),
             '/productdetails': (context) => const ProductDetails(),
             '/shipmentdetails': (context) => const ShipmentDetails(),
+            '/historydetails': (context) => const HistoryDetails(),
           },
           debugShowCheckedModeBanner: false,
           title: 'Sample CoffeeApp Demo',

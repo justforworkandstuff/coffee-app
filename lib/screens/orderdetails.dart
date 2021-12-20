@@ -40,15 +40,15 @@ class _OrderDetailsState extends State<OrderDetails> {
 
   @override
   Widget build(BuildContext context) {
-    final todo =
+    final selectedOrderData =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    idKey = todo['id'];
-    priceKey = todo['price'];
-    productIDKey = todo['product-ID'];
-    productKey = todo['product'];
-    quantityKey = todo['quantity'];
-    createdAtKey = todo['timestamp'];
-    balanceKey = todo['balance'];
+    idKey = selectedOrderData['id'];
+    priceKey = selectedOrderData['price'];
+    productIDKey = selectedOrderData['product-ID'];
+    productKey = selectedOrderData['product'];
+    quantityKey = selectedOrderData['quantity'];
+    createdAtKey = selectedOrderData['timestamp'];
+    balanceKey = selectedOrderData['balance'];
 
     return SafeArea(
       child: Scaffold(
