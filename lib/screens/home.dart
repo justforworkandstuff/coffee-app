@@ -2,7 +2,6 @@ import 'package:coffeeproject/screens/homie.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/screens/orders.dart';
 import 'package:coffeeproject/screens/products.dart';
-import 'package:coffeeproject/screens/testscreen.dart';
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:coffeeproject/shared/wrapper.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +24,6 @@ class _HomeState extends State<Home> {
     Products(),
     Orders(),
     Wrapper(),
-    TestScreen(),
   ];
 
   //bottom navigation bar items 
@@ -66,7 +64,6 @@ class _HomeState extends State<Home> {
             BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'Products'),
             BottomNavigationBarItem(icon: Icon(Icons.money), label: 'Orders'),
             BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Profile'),
-            BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Test'),
           ],
         ),
       ),

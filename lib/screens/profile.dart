@@ -27,9 +27,9 @@ class _ProfileState extends State<Profile> {
   bool loading = false;
 
   //initState and manualRefresh
-  Map<String, dynamic>? data;
-  String userCurrentImage = '';
-  double balance = 0.0;
+  //Map<String, dynamic>? data;
+  //String userCurrentImage = '';
+  //double balance = 0.0;
 
   //createReloadDialog
   double reloadAmount = 0.0;
@@ -43,7 +43,7 @@ class _ProfileState extends State<Profile> {
   String emptyImage = 'The current image is already empty.';
 
   // reload dialog
-  void createReloadDialog(BuildContext context) {
+  void createReloadDialog(BuildContext context, double balance) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -70,16 +70,11 @@ class _ProfileState extends State<Profile> {
               MaterialButton(
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
-                      dynamic result =
-                          await _auth.userBalanceAdd(balance, reloadAmount);
+                      await _auth.userBalanceAdd(balance, reloadAmount);
 
-                      if (result == null) {
-                        print('Something went wrong.');
-                      } else {
-                        print('reload done #createReloadDialog');
-                        Navigator.pop(context);
-                        manualRefresh();
-                      }
+                      print('reload done #createReloadDialog');
+                      Navigator.pop(context);
+                      // manualRefresh();
                     }
                   },
                   child: Text('Confirm')),
@@ -111,13 +106,9 @@ class _ProfileState extends State<Profile> {
                 validator: (val) {
                   if (val!.isEmpty) {
                     return 'Please enter your phone number';
-                  }
-                  else if(val.length < 9)
-                  {
+                  } else if (val.length < 9) {
                     return 'Minimum length = 9.';
-                  }
-                  else
-                  {
+                  } else {
                     return null;
                   }
                 },
@@ -214,7 +205,7 @@ class _ProfileState extends State<Profile> {
                   ListTile(
                     title: Text('Remove picture'),
                     onTap: () {
-                      removeImage();
+                      // removeImage();
                       Navigator.pop(context);
                     },
                   ),
@@ -224,31 +215,31 @@ class _ProfileState extends State<Profile> {
   }
 
   //remove image
-  void removeImage() async {
-    try {
-      if (userCurrentImage != '') {
-        FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
-        setState(() {
-          loading = true;
-          userCurrentImage = '';
-        });
-        dynamic result = await _auth.userImageAdd(userCurrentImage);
+  // void removeImage() async {
+  //   try {
+  //     if (userCurrentImage != '') {
+  //       FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
+  //       setState(() {
+  //         loading = true;
+  //         userCurrentImage = '';
+  //       });
+  //       dynamic result = await _auth.userImageAdd(userCurrentImage);
 
-        if (result == null) {
-          Fluttertoast.showToast(msg: 'User image removed successfully.');
-          setState(() => loading = false);
-        } else {
-          Fluttertoast.showToast(msg: 'Something went wrong..');
-          setState(() => loading = false);
-        }
-      } else {
-        Fluttertoast.showToast(msg: emptyImage);
-        print(emptyImage);
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-  }
+  //       if (result == null) {
+  //         Fluttertoast.showToast(msg: 'User image removed successfully.');
+  //         setState(() => loading = false);
+  //       } else {
+  //         Fluttertoast.showToast(msg: 'Something went wrong..');
+  //         setState(() => loading = false);
+  //       }
+  //     } else {
+  //       Fluttertoast.showToast(msg: emptyImage);
+  //       print(emptyImage);
+  //     }
+  //   } catch (e) {
+  //     print(e.toString());
+  //   }
+  // }
 
   //image picker
   void loadPicker(ImageSource source) async {
@@ -278,14 +269,14 @@ class _ProfileState extends State<Profile> {
     uploadTask.whenComplete(() async {
       url = await ref.getDownloadURL();
       dynamic result = await _auth.userImageAdd(url);
-      if (userCurrentImage != '') {
-        FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
-      }
+      // if (userCurrentImage != '') {
+      //   FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
+      // }
 
       if (result == null) {
         setState(() => loading = false);
         Fluttertoast.showToast(msg: 'Image added successfully');
-        manualRefresh();
+        // manualRefresh();
       } else {
         setState(() => loading = false);
         Fluttertoast.showToast(msg: 'Image add error. Please try again.');
@@ -295,34 +286,34 @@ class _ProfileState extends State<Profile> {
   }
 
   //reading profile
-  @override
-  void initState() {
-    super.initState();
-    setState(() => loading = true);
-    _auth.userItemRead().then((value) {
-      data = value.data();
-      setState(() {
-        loading = false;
-        balance = data!['balance'];
-        userCurrentImage = data!['image'];
-        print('Initial read userImage done #initState #profile.dart');
-      });
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   setState(() => loading = true);
+  //   _auth.userItemRead().then((value) {
+  //     data = value.data();
+  //     setState(() {
+  //       loading = false;
+  //       balance = data!['balance'];
+  //       userCurrentImage = data!['image'];
+  //       print('Initial read userImage done #initState #profile.dart');
+  //     });
+  //   });
+  // }
 
   //manual refresh
-  void manualRefresh() {
-    setState(() => loading = true);
-    _auth.userItemRead().then((value) {
-      data = value.data();
-      setState(() {
-        loading = false;
-        balance = data!['balance'];
-        userCurrentImage = data!['image'];
-        print('Refresh userImage done #manualRefresh');
-      });
-    });
-  }
+  // void manualRefresh() {
+  //   setState(() => loading = true);
+  //   _auth.userItemRead().then((value) {
+  //     data = value.data();
+  //     setState(() {
+  //       loading = false;
+  //       balance = data!['balance'];
+  //       userCurrentImage = data!['image'];
+  //       print('Refresh userImage done #manualRefresh');
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -406,7 +397,7 @@ class _ProfileState extends State<Profile> {
                                     SizedBox(height: 15.0),
                                     ElevatedButton.icon(
                                         onPressed: () {
-                                          createReloadDialog(context);
+                                          createReloadDialog(context, userMap['balance']);
                                         },
                                         icon: Icon(Icons.money),
                                         label: Text('Top up')),

@@ -76,15 +76,15 @@ class AuthService {
   }
 
   //subtracting balance for orders
-  Future userBalanceSubtract(double balance, double price) async {
-    try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .minusBalance(balance, price);
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
+  // Future userBalanceSubtract(double balance, double price) async {
+  //   try {
+  //     return await DatabaseService(uid: _auth.currentUser!.uid)
+  //         .minusBalance(balance, price);
+  //   } catch (e) {
+  //     print(e.toString());
+  //     return null;
+  //   }
+  // }
 
   //reading user items
   Future userItemRead() async {
@@ -134,10 +134,10 @@ class AuthService {
 
   //buying order items
   Future makeOrder(String productName, double productPrice, int quantity,
-      String productID, bool shipped) async {
+      String productID, bool shipped, String address) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid).placeOrder(
-          productName, productPrice, quantity, productID, shipped);
+          productName, productPrice, quantity, productID, shipped, address);
     } catch (e) {
       print(e.toString());
       return null;
@@ -163,6 +163,7 @@ class AuthService {
       int quantity,
       String productID,
       bool shipped,
+      String address,
       ) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid).deleteOrder(
@@ -173,6 +174,7 @@ class AuthService {
           quantity,
           productID,
           shipped,
+          address
           );
     } catch (e) {
       print(e.toString());
@@ -182,10 +184,10 @@ class AuthService {
 
   //received item
   Future receivedShipmentFields(String productID, String productName, double productPrice,
-  String id, int quantity, String ordered) async {
+  String id, int quantity, String ordered, String address) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .receivedShipment(productID, productName, productPrice, id, quantity, ordered);
+          .receivedShipment(productID, productName, productPrice, id, quantity, ordered, address);
     } catch (e) {
       print(e.toString());
       return null;
@@ -241,4 +243,19 @@ class AuthService {
       return null;
     }
   }
+
+  //get product image
+  Future readProductImage(String docID) async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).getProductImage(docID);
+    }
+    catch(e)
+    {
+      print(e.toString());
+      return null;
+    }
+  }
+
 }

@@ -24,9 +24,13 @@ class DatabaseService {
       'orderID': uid + 'ORDERID',
     }).then((value) async {
       String orderID = uid + 'ORDERID';
-      await orderList
-          .doc(orderID)
-          .set({'owner': uid, 'cart': [], 'shipment': [], 'cartAmount': 0.0});
+      await orderList.doc(orderID).set({
+        'owner': uid,
+        'cart': [],
+        'shipment': [],
+        'history': [],
+        'cartAmount': 0.0
+      });
     });
   }
 
@@ -51,14 +55,14 @@ class DatabaseService {
   }
 
   //subtract balance
-  Future minusBalance(double balance, double price) async {
-    double newBalance = balance - price;
-    double abcde = double.parse(newBalance.toStringAsFixed(2));
+  // Future minusBalance(double balance, double price) async {
+  //   double newBalance = balance - price;
+  //   double abcde = double.parse(newBalance.toStringAsFixed(2));
 
-    return await userList.doc(uid).update({
-      'balance': abcde,
-    });
-  }
+  //   return await userList.doc(uid).update({
+  //     'balance': abcde,
+  //   });
+  // }
 
   //reading user Lists
   Future readUsers() async {
@@ -80,7 +84,7 @@ class DatabaseService {
 
   //place order
   Future placeOrder(String productName, double productPrice, int quantity,
-      String productID, bool shipped) async {
+      String productID, bool shipped, String address) async {
     return await orderList
         .doc(uid + 'ORDERID')
         .update({
@@ -93,6 +97,7 @@ class DatabaseService {
               'Quantity': quantity.toString(),
               'Ordered': DateTime.now().toString().substring(0, 16),
               'Shipped': shipped,
+              'Address': address,
             }
           ]),
           'cartAmount': FieldValue.increment(productPrice),
@@ -113,8 +118,15 @@ class DatabaseService {
   }
 
   //delete single order field
-  Future deleteOrder(String id, String productName, double productPrice,
-      String ordered, int quantity, String productID, bool shipped) async {
+  Future deleteOrder(
+      String id,
+      String productName,
+      double productPrice,
+      String ordered,
+      int quantity,
+      String productID,
+      bool shipped,
+      String address) async {
     return await orderList
         .doc(uid + 'ORDERID')
         .update({
@@ -127,6 +139,7 @@ class DatabaseService {
               'Quantity': quantity.toString(),
               'Ordered': ordered,
               'Shipped': shipped,
+              'Address': address,
             }
           ]),
         })
@@ -141,8 +154,14 @@ class DatabaseService {
   }
 
   //received item
-  Future receivedShipment(String productID, String productName,
-      double productPrice, String id, int quantity, String ordered) async {
+  Future receivedShipment(
+      String productID,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String ordered,
+      String address) async {
     return await orderList.doc(uid + 'ORDERID').update({
       'history': FieldValue.arrayUnion([
         {
@@ -152,6 +171,7 @@ class DatabaseService {
           'ID': id,
           'Quantity': quantity.toString(),
           'Received': DateTime.now().toString().substring(0, 16),
+          'Address': address,
         }
       ]),
     }).then((value) async {
@@ -165,6 +185,7 @@ class DatabaseService {
             'Product-ID': productID,
             'Quantity': quantity.toString(),
             'Shipped': true,
+            'Address': address,
           }
         ]),
       });
@@ -208,5 +229,10 @@ class DatabaseService {
   //admin delete specific product
   Future removeProduct(String docID) async {
     return await productList.doc(docID).delete();
+  }
+
+  //test get product image
+  Future getProductImage(String docID) async {
+    return await productList.doc(docID).get();
   }
 }
