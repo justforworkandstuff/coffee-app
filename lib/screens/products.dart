@@ -16,12 +16,13 @@ class _ProductsState extends State<Products> {
   Map<String, dynamic>? data;
 
   //data to be loaded
-  double balance = 0.0;
+  // double balance = 0.0;
   String productData = '';
   double priceData = 0.0;
   String imageData = '';
   int inventoryData = 0;
   String productIDData = '';
+  String address = '';
 
   //loads balance whenever screen starts
   @override
@@ -32,24 +33,25 @@ class _ProductsState extends State<Products> {
       data = value.data();
       setState(() {
         loading = false;
-        balance = data!['balance'];
-        print('Initial balance read done. #initState #products.dart');
+        // balance = data!['balance'];
+        address = data!['address'];
+        print('Initial address read done. #initState #products.dart');
       });
     });
   }
 
   //perform manual refresh on balance
-  void manualRefresh() {
-    setState(() => loading = true);
-    _auth.userItemRead().then((value) {
-      data = value.data();
-      setState(() {
-        loading = false;
-        balance = data!['balance'];
-        print('Balance reload done. #manualRefresh #products.dart');
-      });
-    });
-  }
+  // void manualRefresh() {
+  //   setState(() => loading = true);
+  //   _auth.userItemRead().then((value) {
+  //     data = value.data();
+  //     setState(() {
+  //       loading = false;
+  //       balance = data!['balance'];
+  //       print('Balance reload done. #manualRefresh #products.dart');
+  //     });
+  //   });
+  // }
   
   @override
   Widget build(BuildContext context) {
@@ -81,12 +83,13 @@ class _ProductsState extends State<Products> {
               'price': priceData.toString(),
               'inventory': inventoryData.toString(),
               'ID': productIDData,
+              'address': address,
             };
             
             return InkWell(
               onTap: () {
-                Navigator.pushNamed(context, '/productdetails', arguments: productDetailsMap)
-                .then((_) => manualRefresh());
+                Navigator.pushNamed(context, '/productdetails', arguments: productDetailsMap);
+                // .then((_) => manualRefresh());
               },
               child: Card(
                 elevation: 10.0,
