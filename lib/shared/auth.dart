@@ -107,7 +107,7 @@ class AuthService {
   }
 
   //updating user phoneNo
-  Future userPhoneUpdate(int phoneNo) async {
+  Future userPhoneUpdate(int? phoneNo) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
           .updatePhoneNo(phoneNo);
@@ -118,7 +118,7 @@ class AuthService {
   }
 
   //updating user address
-  Future userAddressUpdate(String address) async {
+  Future userAddressUpdate(String? address) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
           .updateAddress(address);
