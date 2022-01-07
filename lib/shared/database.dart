@@ -45,12 +45,12 @@ class DatabaseService {
   }
 
   //update user Phone No
-  Future updatePhoneNo(int phoneNo) async {
+  Future updatePhoneNo(int? phoneNo) async {
     return await userList.doc(uid).update({'phoneNo': phoneNo});
   }
 
   //update user address
-  Future updateAddress(String address) async {
+  Future updateAddress(String? address) async {
     return await userList.doc(uid).update({'address': address});
   }
 

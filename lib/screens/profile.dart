@@ -35,8 +35,8 @@ class _ProfileState extends State<Profile> {
   double reloadAmount = 0.0;
 
   //createEditDialog
-  int phoneNo = 000;
-  String address = '';
+  String? address;
+  int? phoneNo;
 
   //uploadFile, removeImage, loadPicker
   File? image;
@@ -89,7 +89,8 @@ class _ProfileState extends State<Profile> {
   }
 
   // user details phone edit dialog
-  void createEditPhoneDialog(BuildContext context, int initialNumber) {
+  void createEditPhoneDialog(
+      BuildContext context, int initialNumber) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -108,12 +109,14 @@ class _ProfileState extends State<Profile> {
                     return 'Please enter your phone number';
                   } else if (val.length < 9) {
                     return 'Minimum length = 9.';
-                  } else {
-                    return null;
+                  } else if (val.startsWith('0')) {
+                    return '0 must not be starting digit.';
                   }
                 },
                 onChanged: (val) {
-                  setState(() => phoneNo = int.parse(val));
+                  if (int.parse(val) != initialNumber) {
+                    setState(() => phoneNo = int.parse(val));
+                  }
                 },
               ),
             ),
@@ -121,9 +124,15 @@ class _ProfileState extends State<Profile> {
               MaterialButton(
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
-                      await _auth.userPhoneUpdate(phoneNo);
-                      print('update phone done #createEditPhoneDialog');
-                      Navigator.pop(context);
+                      if (phoneNo == null) {
+                        await _auth.userPhoneUpdate(initialNumber);
+                        print('update phone done #createEditPhoneDialog');
+                        Navigator.pop(context);
+                      } else {
+                        await _auth.userPhoneUpdate(phoneNo);
+                        print('update phone done #createEditPhoneDialog');
+                        Navigator.pop(context);
+                      }
                     }
                   },
                   child: Text('Confirm')),
@@ -155,7 +164,9 @@ class _ProfileState extends State<Profile> {
                 validator: (val) =>
                     val!.isEmpty ? 'Please enter your address.' : null,
                 onChanged: (val) {
-                  setState(() => address = val);
+                  if (val != initialAddress) {
+                    setState(() => address = val);
+                  }
                 },
               ),
             ),
@@ -163,9 +174,15 @@ class _ProfileState extends State<Profile> {
               MaterialButton(
                   onPressed: () async {
                     if (_validationkey.currentState!.validate()) {
-                      await _auth.userAddressUpdate(address);
-                      print('update address done #createEditAddressDialog');
-                      Navigator.pop(context);
+                      if (address == null) {
+                        await _auth.userAddressUpdate(initialAddress);
+                        print('update address done #createEditAddressDialog');
+                        Navigator.pop(context);
+                      } else {
+                        await _auth.userAddressUpdate(address);
+                        print('update address done #createEditAddressDialog');
+                        Navigator.pop(context);
+                      }
                     }
                   },
                   child: Text('Confirm')),
@@ -397,7 +414,8 @@ class _ProfileState extends State<Profile> {
                                     SizedBox(height: 15.0),
                                     ElevatedButton.icon(
                                         onPressed: () {
-                                          createReloadDialog(context, userMap['balance']);
+                                          createReloadDialog(
+                                              context, userMap['balance']);
                                         },
                                         icon: Icon(Icons.money),
                                         label: Text('Top up')),
@@ -450,8 +468,8 @@ class _ProfileState extends State<Profile> {
                                         child: IconButton(
                                           icon: Icon(Icons.edit),
                                           onPressed: () {
-                                            createEditPhoneDialog(
-                                                context, userMap['phoneNo']);
+                                            createEditPhoneDialog(context,
+                                                userMap['phoneNo']);
                                           },
                                         ),
                                       ),

@@ -265,8 +265,9 @@ class _SignInState extends State<SignIn> {
                                 return 'Please enter your phone number';
                               } else if (val.length < 9) {
                                 return 'Minimum length = 9.';
-                              } else {
-                                return null;
+                              } else if (val.startsWith('0'))
+                              {
+                                return '0 must not be starting digit.';
                               }
                             },
                             onChanged: ((val) {
