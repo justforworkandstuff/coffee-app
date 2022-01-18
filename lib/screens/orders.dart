@@ -40,7 +40,7 @@ class _OrdersState extends State<Orders> {
       DropdownMenuItem(child: Text(value), value: value);
 
   //test getproductimage function
-  void readProductImage(String docID) async {
+  Future readProductImage(String docID) async {
     await _auth.readProductImage(docID).then((value) {
       setState(() => productImage = value.data()['image']);
     });
@@ -192,7 +192,7 @@ class _OrdersState extends State<Orders> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: TabBarView(
                         children: [
-                          //order tab
+                          //order tab ///////////////////////////////////////
                           Column(
                             children: [
                               Padding(
@@ -203,26 +203,6 @@ class _OrdersState extends State<Orders> {
                                 child: ListView.builder(
                                   itemCount: orderList.length,
                                   itemBuilder: (context, index) {
-                                    final Map<String, String> orderMap = {
-                                      'id': orderList[index]['ID'] ?? sampleID,
-                                      'price': orderList[index]['Price'] ??
-                                          samplePrice,
-                                      'product-ID': orderList[index]
-                                              ['Product-ID'] ??
-                                          sampleProductID,
-                                      'product': orderList[index]['Product'] ??
-                                          sampleProduct,
-                                      'quantity': orderList[index]
-                                              ['Quantity'] ??
-                                          sampleQuantity,
-                                      'timestamp': orderList[index]
-                                              ['Ordered'] ??
-                                          sampleTime,
-                                      'balance': balance.toString(),
-                                      'image': productImage,
-                                      'address': userAddress,
-                                    };
-
                                     return Padding(
                                       padding: EdgeInsets.only(top: 10.0),
                                       child: Card(
@@ -232,8 +212,31 @@ class _OrdersState extends State<Orders> {
                                         ),
                                         child: ListTile(
                                           onTap: () async {
-                                            readProductImage(
+                                            await readProductImage(
                                                 orderList[index]['Product-ID']);
+                                            final Map<String, String> orderMap =
+                                                {
+                                              'id': orderList[index]['ID'] ??
+                                                  sampleID,
+                                              'price': orderList[index]
+                                                      ['Price'] ??
+                                                  samplePrice,
+                                              'product-ID': orderList[index]
+                                                      ['Product-ID'] ??
+                                                  sampleProductID,
+                                              'product': orderList[index]
+                                                      ['Product'] ??
+                                                  sampleProduct,
+                                              'quantity': orderList[index]
+                                                      ['Quantity'] ??
+                                                  sampleQuantity,
+                                              'timestamp': orderList[index]
+                                                      ['Ordered'] ??
+                                                  sampleTime,
+                                              'balance': balance.toString(),
+                                              'image': productImage,
+                                              'address': userAddress,
+                                            };
                                             Navigator.pushNamed(
                                                 context, '/orderdetails',
                                                 arguments: orderMap);
@@ -251,28 +254,10 @@ class _OrdersState extends State<Orders> {
                               ),
                             ],
                           ),
-                          //shipment tab
+                          //shipment tab ///////////////////////////////////////
                           ListView.builder(
                             itemCount: shipmentList.length,
                             itemBuilder: (context, index) {
-                              final Map<String, String> shipMap = {
-                                'id': shipmentList[index]['ID'] ?? sampleID,
-                                'price':
-                                    shipmentList[index]['Price'] ?? samplePrice,
-                                'product-ID': shipmentList[index]
-                                        ['Product-ID'] ??
-                                    sampleProductID,
-                                'product': shipmentList[index]['Product'] ??
-                                    sampleProduct,
-                                'quantity': shipmentList[index]['Quantity'] ??
-                                    sampleQuantity,
-                                'status':
-                                    shipmentList[index]['Shipped'].toString(),
-                                'ordered': shipmentList[index]['Ordered'],
-                                'address': userAddress,
-                                'image': productImage,
-                              };
-
                               isShipped = shipmentList[index]['Shipped'];
 
                               return Padding(
@@ -280,8 +265,31 @@ class _OrdersState extends State<Orders> {
                                 child: Card(
                                   child: ListTile(
                                       onTap: () async {
-                                        readProductImage(
+                                        await readProductImage(
                                             shipmentList[index]['Product-ID']);
+                                        final Map<String, String> shipMap = {
+                                          'id': shipmentList[index]['ID'] ??
+                                              sampleID,
+                                          'price': shipmentList[index]
+                                                  ['Price'] ??
+                                              samplePrice,
+                                          'product-ID': shipmentList[index]
+                                                  ['Product-ID'] ??
+                                              sampleProductID,
+                                          'product': shipmentList[index]
+                                                  ['Product'] ??
+                                              sampleProduct,
+                                          'quantity': shipmentList[index]
+                                                  ['Quantity'] ??
+                                              sampleQuantity,
+                                          'status': shipmentList[index]
+                                                  ['Shipped']
+                                              .toString(),
+                                          'ordered': shipmentList[index]
+                                              ['Ordered'],
+                                          'address': userAddress,
+                                          'image': productImage,
+                                        };
                                         Navigator.pushNamed(
                                             context, '/shipmentdetails',
                                             arguments: shipMap);
@@ -306,34 +314,38 @@ class _OrdersState extends State<Orders> {
                               );
                             },
                           ),
-                          //history tab
+                          //history tab ///////////////////////////////////////
                           ListView.builder(
                             itemCount: historyList.length,
                             itemBuilder: (context, index) {
-                              final Map<String, String> historyMap = {
-                                'id': historyList[index]['ID'] ?? sampleID,
-                                'price':
-                                    historyList[index]['Price'] ?? samplePrice,
-                                'product-ID': historyList[index]
-                                        ['Product-ID'] ??
-                                    sampleProductID,
-                                'product': historyList[index]['Product'] ??
-                                    sampleProduct,
-                                'quantity': historyList[index]['Quantity'] ??
-                                    sampleQuantity,
-                                'timestamp': historyList[index]['Received'] ??
-                                    sampleTime,
-                                'address': userAddress,
-                                'image': productImage,
-                              };
-
                               return Padding(
                                 padding: EdgeInsets.only(top: 10.0),
                                 child: Card(
                                   child: ListTile(
                                     onTap: () async {
-                                      readProductImage(
+                                      await readProductImage(
                                           historyList[index]['Product-ID']);
+                                      final Map<String, String> historyMap = {
+                                        'id': historyList[index]['ID'] ??
+                                            sampleID,
+                                        'price': historyList[index]['Price'] ??
+                                            samplePrice,
+                                        'product-ID': historyList[index]
+                                                ['Product-ID'] ??
+                                            sampleProductID,
+                                        'product': historyList[index]
+                                                ['Product'] ??
+                                            sampleProduct,
+                                        'quantity': historyList[index]
+                                                ['Quantity'] ??
+                                            sampleQuantity,
+                                        'timestamp': historyList[index]
+                                                ['Received'] ??
+                                            sampleTime,
+                                        'address': userAddress,
+                                        'image': productImage,
+                                      };
+
                                       Navigator.pushNamed(
                                           context, '/historydetails',
                                           arguments: historyMap);
@@ -378,230 +390,6 @@ class _OrdersState extends State<Orders> {
                   ),
                 );
               }
-
-              // final DocumentSnapshot? dataSnapshot = snapshot.data;
-              // final Map<String, dynamic> dataMap =
-              //     dataSnapshot!.data() as Map<String, dynamic>;
-
-              // //orders
-              // final List<Map<String, dynamic>> orderList =
-              //     (dataMap['cart'] as List)
-              //         .map((value) => value as Map<String, dynamic>)
-              //         .toList();
-              // checkOutCart = orderList;
-
-              // //shipments
-              // final List<Map<String, dynamic>> shipmentList =
-              //     (dataMap['shipment'] as List)
-              //         .map((e) => e as Map<String, dynamic>)
-              //         .toList();
-
-              // //history
-              // final List<Map<String, dynamic>> historyList =
-              //     (dataMap['history'] as List)
-              //         .map((e) => e as Map<String, dynamic>)
-              //         .toList();
-
-              // return DefaultTabController(
-              //   length: 3,
-              //   child: Scaffold(
-              //     appBar: TabBar(
-              //       onTap: (int index) {
-              //         setState(() => selectedIndex = index);
-              //       },
-              //       tabs: [
-              //         Tab(icon: Icon(Icons.shopping_cart, color: Colors.black)),
-              //         Tab(
-              //             icon:
-              //                 Icon(Icons.local_shipping, color: Colors.black)),
-              //         Tab(icon: Icon(Icons.history, color: Colors.black)),
-              //       ],
-              //     ),
-              //     body: Padding(
-              //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              //       child: TabBarView(
-              //         children: [
-              //           //order tab
-              //           Column(
-              //             children: [
-              //               Padding(
-              //                   padding: EdgeInsets.only(top: 15.0),
-              //                   child: Text(
-              //                       'Current Cart Amount: ${dataSnapshot['cartAmount'].toString()}')),
-              //               Expanded(
-              //                 child: ListView.builder(
-              //                   itemCount: orderList.length,
-              //                   itemBuilder: (context, index) {
-              //                     final Map<String, String> orderMap = {
-              //                       'id': orderList[index]['ID'] ?? sampleID,
-              //                       'price': orderList[index]['Price'] ??
-              //                           samplePrice,
-              //                       'product-ID': orderList[index]
-              //                               ['Product-ID'] ??
-              //                           sampleProductID,
-              //                       'product': orderList[index]['Product'] ??
-              //                           sampleProduct,
-              //                       'quantity': orderList[index]['Quantity'] ??
-              //                           sampleQuantity,
-              //                       'timestamp': orderList[index]['Ordered'] ??
-              //                           sampleTime,
-              //                       'balance': balance.toString(),
-              //                       'image': productImage,
-              //                       'address': userAddress,
-              //                     };
-
-              //                     return Padding(
-              //                       padding: EdgeInsets.only(top: 10.0),
-              //                       child: Card(
-              //                         shape: RoundedRectangleBorder(
-              //                           borderRadius:
-              //                               BorderRadius.circular(15.0),
-              //                         ),
-              //                         child: ListTile(
-              //                           onTap: () async {
-              //                             readProductImage(
-              //                                 orderList[index]['Product-ID']);
-              //                             Navigator.pushNamed(
-              //                                 context, '/orderdetails',
-              //                                 arguments: orderMap)
-              //                             .then((_) => manualRefresh());
-              //                           },
-              //                           title: Text(
-              //                               'Order ID: \n\n ${orderList[index]['ID']}\n'),
-              //                           subtitle: Text(
-              //                               'Ordered: ${orderList[index]['Ordered']}'),
-              //                         ),
-              //                       ),
-              //                     );
-              //                   },
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //           //shipment tab
-              //           ListView.builder(
-              //             itemCount: shipmentList.length,
-              //             itemBuilder: (context, index) {
-              //               final Map<String, String> shipMap = {
-              //                 'id': shipmentList[index]['ID'] ?? sampleID,
-              //                 'price':
-              //                     shipmentList[index]['Price'] ?? samplePrice,
-              //                 'product-ID': shipmentList[index]['Product-ID'] ??
-              //                     sampleProductID,
-              //                 'product': shipmentList[index]['Product'] ??
-              //                     sampleProduct,
-              //                 'quantity': shipmentList[index]['Quantity'] ??
-              //                     sampleQuantity,
-              //                 'status':
-              //                     shipmentList[index]['Shipped'].toString(),
-              //                 'ordered': shipmentList[index]['Ordered'],
-              //                 'address': userAddress,
-              //                 'image': productImage,
-              //               };
-
-              //               isShipped = shipmentList[index]['Shipped'];
-
-              //               return Padding(
-              //                 padding: EdgeInsets.only(top: 10.0),
-              //                 child: Card(
-              //                   child: ListTile(
-              //                       onTap: () async {
-              //                         readProductImage(
-              //                             orderList[index]['Product-ID']);
-              //                         Navigator.pushNamed(
-              //                             context, '/shipmentdetails',
-              //                             arguments: shipMap)
-              //                         .then((_) => manualRefresh());
-              //                       },
-              //                       title: Text(
-              //                           'Shipment ID: \n\n ${shipmentList[index]['ID']}\n'),
-              //                       subtitle: isShipped
-              //                           ? Text(
-              //                               'Status: Already shipped, please confirm.',
-              //                               style: TextStyle(
-              //                                   color: Colors.green,
-              //                                   fontWeight: FontWeight.bold),
-              //                             )
-              //                           : Text(
-              //                               'Status: Not shipped',
-              //                               style: TextStyle(
-              //                                   color: Colors.red,
-              //                                   fontWeight: FontWeight.bold),
-              //                             )),
-              //                 ),
-              //               );
-              //             },
-              //           ),
-              //           //history tab
-              //           ListView.builder(
-              //             itemCount: historyList.length,
-              //             itemBuilder: (context, index) {
-              //               final Map<String, String> historyMap = {
-              //                 'id': historyList[index]['ID'] ?? sampleID,
-              //                 'price':
-              //                     historyList[index]['Price'] ?? samplePrice,
-              //                 'product-ID': historyList[index]['Product-ID'] ??
-              //                     sampleProductID,
-              //                 'product': historyList[index]['Product'] ??
-              //                     sampleProduct,
-              //                 'quantity': historyList[index]['Quantity'] ??
-              //                     sampleQuantity,
-              //                 'timestamp':
-              //                     historyList[index]['Received'] ?? sampleTime,
-              //                 'address': userAddress,
-              //                 'image': productImage,
-              //               };
-
-              //               return Padding(
-              //                 padding: EdgeInsets.only(top: 10.0),
-              //                 child: Card(
-              //                   child: ListTile(
-              //                     onTap: () async {
-              //                       readProductImage(
-              //                           orderList[index]['Product-ID']);
-              //                       Navigator.pushNamed(
-              //                           context, '/historydetails',
-              //                           arguments: historyMap)
-              //                       .then((_) => manualRefresh());
-              //                     },
-              //                     title: Text(
-              //                         'History ID: \n\n ${historyList[index]['ID']}\n'),
-              //                     subtitle: Text(
-              //                       'Received: ${historyList[index]['Received']}',
-              //                       style: TextStyle(
-              //                         color: Colors.green,
-              //                         fontWeight: FontWeight.bold,
-              //                       ),
-              //                     ),
-              //                   ),
-              //                 ),
-              //               );
-              //             },
-              //           )
-              //         ],
-              //       ),
-              //     ),
-              //     bottomNavigationBar: selectedIndex == 0
-              //         ? Row(
-              //             children: [
-              //               Expanded(
-              //                 flex: 5,
-              //                 child: dataSnapshot['cartAmount'] != 0.0
-              //                     ? ElevatedButton(
-              //                         onPressed: () {
-              //                           confirmDialog(context,
-              //                               dataSnapshot['cartAmount']);
-              //                         },
-              //                         child: Text('Check Out All Orders'))
-              //                     : ElevatedButton(
-              //                         onPressed: null,
-              //                         child: Text('Check Out All Orders')),
-              //               ),
-              //             ],
-              //           )
-              //         : null,
-              //   ),
-              // );
             },
           );
   }
