@@ -1,3 +1,4 @@
+import 'package:coffeeproject/main.dart';
 import 'package:coffeeproject/screens/homie.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/screens/orders.dart';
@@ -17,7 +18,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   // GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final AuthService _auth = AuthService();
-  
+
   int _selectedIndex = 0;
   List<Widget> _pageList = [
     HomePagie(),
@@ -54,6 +55,7 @@ class _HomeState extends State<Home> {
         ),
         body: _pageList[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
+          key: btmNavBarKey,
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
