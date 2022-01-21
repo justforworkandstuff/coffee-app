@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:coffeeproject/main.dart';
 import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:coffeeproject/shared/loading.dart';
@@ -14,6 +15,8 @@ class Orders extends StatefulWidget {
 
 class _OrdersState extends State<Orders> {
   final AuthService _auth = AuthService();
+  final BottomNavigationBar btmNavBar =
+      btmNavBarKey.currentWidget as BottomNavigationBar;
   Map<String, dynamic>? data;
   var orderList;
   bool loading = false;
@@ -39,7 +42,7 @@ class _OrdersState extends State<Orders> {
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
 
-  //test getproductimage function
+  //getproductimage function
   Future readProductImage(String docID) async {
     await _auth.readProductImage(docID).then((value) {
       setState(() => productImage = value.data()['image']);
@@ -62,7 +65,7 @@ class _OrdersState extends State<Orders> {
         loading = false;
         balance = data!['balance'];
         userAddress = data!['address'];
-        print('Initial read balance done #initState #orders.dart');
+        print('Initial read balance and address done #initState #orders.dart');
       });
     });
   }
@@ -76,7 +79,8 @@ class _OrdersState extends State<Orders> {
         loading = false;
         balance = data!['balance'];
         userAddress = data!['address'];
-        print('Manual refresh balance done #manualRefresh #orders.dart');
+        print(
+            'Manual refresh balance and address done #manualRefresh #orders.dart');
       });
     });
   }
@@ -89,7 +93,7 @@ class _OrdersState extends State<Orders> {
     Navigator.pop(context);
   }
 
-  //confirm dialog
+  //confirm checkout dialog
   void confirmDialog(BuildContext context, double cartAmount) {
     showDialog(
         context: context,
@@ -97,18 +101,75 @@ class _OrdersState extends State<Orders> {
           return AlertDialog(
             title: Text('Confirm'),
             content: Container(
-              height: 100.0,
+              height: 200.0,
               child: Column(
                 children: [
                   Center(
                     child: (cartAmount < balance)
-                        ? Text(
-                            'Your delivery address is: \n$userAddress\nAre you sure you want to check out?',
-                            maxLines: 5,
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Your delivery address is:\n'),
+                              InkWell(
+                                onTap: () {
+                                  btmNavBar.onTap!(3);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  '$userAddress >\n',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Current balance: ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text('RM$balance'),
+                                ],
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Cart Amount: ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text('RM$cartAmount\n'),
+                                ],
+                              ),
+                              Text('Are you sure you want to check out?'),
+                            ],
                           )
-                        : Text('You have insufficient balance.'),
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('You have insufficient balance.\n\n'),
+                              InkWell(
+                                onTap: () {
+                                  btmNavBar.onTap!(3);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  'Go to reload balance >',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                   ),
-                  // Center(child: Text('Are you sure you want to check out?')),
                 ],
               ),
             ),
