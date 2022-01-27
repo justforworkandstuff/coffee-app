@@ -134,10 +134,10 @@ class AuthService {
 
   //buying order items
   Future makeOrder(String productName, double productPrice, int quantity,
-      String productID, bool shipped, String address) async {
+      String productID, bool shipped, String address, String image) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid).placeOrder(
-          productName, productPrice, quantity, productID, shipped, address);
+          productName, productPrice, quantity, productID, shipped, address, image);
     } catch (e) {
       print(e.toString());
       return null;
@@ -164,6 +164,7 @@ class AuthService {
       String productID,
       bool shipped,
       String address,
+      String image,
       ) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid).deleteOrder(
@@ -174,7 +175,8 @@ class AuthService {
           quantity,
           productID,
           shipped,
-          address
+          address,
+          image,
           );
     } catch (e) {
       print(e.toString());
@@ -184,21 +186,10 @@ class AuthService {
 
   //received item
   Future receivedShipmentFields(String productID, String productName, double productPrice,
-  String id, int quantity, String ordered, String address) async {
+  String id, int quantity, String ordered, String address, String image) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .receivedShipment(productID, productName, productPrice, id, quantity, ordered, address);
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
-  //subtracts cartAmount after cancelling order
-  Future cartAmountReturn(double productPrice) async {
-    try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .cartSubtraction(productPrice);
+          .receivedShipment(productID, productName, productPrice, id, quantity, ordered, address, image);
     } catch (e) {
       print(e.toString());
       return null;
@@ -220,42 +211,5 @@ class AuthService {
   /////////////////////////////////////////////////////////////////////////////
   //Productsssssssssssssssssss
   /////////////////////////////////////////////////////////////////////////////
-
-  //input new product
-  Future addProduct(
-      String productName, double productPrice, String image) async {
-    try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .newProduct(productName, productPrice, image);
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
-  //delete specific product
-  Future deleteProduct(String docID) async {
-    try {
-      return await DatabaseService(uid: _auth.currentUser!.uid)
-          .removeProduct(docID);
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
-  //get product image
-  Future readProductImage(String docID) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).getProductImage(docID);
-    }
-    catch(e)
-    {
-      print(e.toString());
-      return null;
-    }
-  }
 
 }

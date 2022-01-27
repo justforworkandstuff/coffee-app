@@ -31,10 +31,10 @@ class _OrderDetailsState extends State<OrderDetails> {
     String productID,
     bool shipped,
     String address,
+    String image,
   ) async {
     await _auth.deleteOrderFields(id, productName, productPrice, ordered,
-        quantity, productID, shipped, address);
-    await _auth.cartAmountReturn(productPrice);
+        quantity, productID, shipped, address, image);
 
     Navigator.pop(context);
     print('Cancel order done. #deleteOrder #orderDetails.dart');
@@ -242,6 +242,7 @@ class _OrderDetailsState extends State<OrderDetails> {
             productIDKey!,
             false,
             addressKey!,
+            imageKey!,
           );
         },
         child: Text('Cancel This Order'),

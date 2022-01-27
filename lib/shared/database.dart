@@ -83,16 +83,23 @@ class DatabaseService {
   var uuid = Uuid();
 
   //place order
-  Future placeOrder(String productName, double productPrice, int quantity,
-      String productID, bool shipped, String address) async {
+  Future placeOrder(
+      String productName,
+      double productPrice,
+      int quantity,
+      String productID,
+      bool shipped,
+      String address,
+      String productImage) async {
     return await orderList
         .doc(uid + 'ORDERID')
         .update({
           'cart': FieldValue.arrayUnion([
             {
               'Product-ID': productID,
+              'Product-Image': productImage,
               'Product': productName,
-              'Price': '$productPrice',
+              'Price': productPrice.toStringAsFixed(2),
               'ID': uuid.v4(),
               'Quantity': quantity.toString(),
               'Ordered': DateTime.now().toString().substring(0, 16),
@@ -100,7 +107,8 @@ class DatabaseService {
               'Address': address,
             }
           ]),
-          'cartAmount': FieldValue.increment(productPrice),
+          'cartAmount': FieldValue.increment(
+              double.parse(productPrice.toStringAsFixed(2))),
         })
         .whenComplete(() => productList.doc(productID).update({
               'inventory': FieldValue.increment(-quantity),
@@ -126,15 +134,17 @@ class DatabaseService {
       int quantity,
       String productID,
       bool shipped,
-      String address) async {
+      String address,
+      String productImage) async {
     return await orderList
         .doc(uid + 'ORDERID')
         .update({
           'cart': FieldValue.arrayRemove([
             {
               'Product-ID': productID,
+              'Product-Image': productImage,
               'Product': productName,
-              'Price': productPrice.toString(),
+              'Price': productPrice.toStringAsFixed(2),
               'ID': id,
               'Quantity': quantity.toString(),
               'Ordered': ordered,
@@ -142,6 +152,8 @@ class DatabaseService {
               'Address': address,
             }
           ]),
+          'cartAmount': FieldValue.increment(
+              -double.parse(productPrice.toStringAsFixed(2))),
         })
         .whenComplete(() => productList.doc(productID).update({
               'inventory': FieldValue.increment(quantity),
@@ -161,13 +173,15 @@ class DatabaseService {
       String id,
       int quantity,
       String ordered,
-      String address) async {
+      String address,
+      String productImage) async {
     return await orderList.doc(uid + 'ORDERID').update({
       'history': FieldValue.arrayUnion([
         {
           'Product-ID': productID,
+          'Product-Image': productImage,
           'Product': productName,
-          'Price': productPrice.toString(),
+          'Price': productPrice.toStringAsFixed(2),
           'ID': id,
           'Quantity': quantity.toString(),
           'Received': DateTime.now().toString().substring(0, 16),
@@ -178,11 +192,12 @@ class DatabaseService {
       await orderList.doc(uid + 'ORDERID').update({
         'shipment': FieldValue.arrayRemove([
           {
+            'Product-ID': productID,
             'ID': id,
             'Ordered': ordered,
-            'Price': productPrice.toString(),
+            'Price': productPrice.toStringAsFixed(2),
             'Product': productName,
-            'Product-ID': productID,
+            'Product-Image': productImage,
             'Quantity': quantity.toString(),
             'Shipped': true,
             'Address': address,
@@ -192,23 +207,18 @@ class DatabaseService {
     });
   }
 
-  //return cartAmount afer cancelling orders
-  Future cartSubtraction(double productPrice) async {
-    return await orderList.doc(uid + 'ORDERID').update({
-      'cartAmount': FieldValue.increment(-productPrice),
-    });
-  }
-
   //check out cart orders
   Future cartCheckOut(
       double cartAmount, List<Map<String, dynamic>> cartList) async {
     return await orderList.doc(uid + 'ORDERID').update({
-      'cartAmount': FieldValue.increment(-cartAmount),
+      'cartAmount':
+          FieldValue.increment(-double.parse(cartAmount.toStringAsFixed(2))),
       'cart': [],
       'shipment': FieldValue.arrayUnion(cartList),
     }).then((value) async {
       await userList.doc(uid).update({
-        'balance': FieldValue.increment(-cartAmount),
+        'balance':
+            FieldValue.increment(-double.parse(cartAmount.toStringAsFixed(2))),
         'orders': 0,
       });
     });
@@ -218,21 +228,4 @@ class DatabaseService {
   /// Products
   ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // admin input new product
-  Future newProduct(
-      String productName, double productPrice, String image) async {
-    return await productList
-        .doc()
-        .set({'Product': productName, 'Price': productPrice, 'image': image});
-  }
-
-  //admin delete specific product
-  Future removeProduct(String docID) async {
-    return await productList.doc(docID).delete();
-  }
-
-  //test get product image
-  Future getProductImage(String docID) async {
-    return await productList.doc(docID).get();
-  }
 }

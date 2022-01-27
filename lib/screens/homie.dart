@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:coffeeproject/reusables/orderselection.dart';
+import 'package:coffeeproject/shared/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -15,9 +15,12 @@ class _HomePagieState extends State<HomePagie> {
   int selectedIndex = 0;
   final carouselController = CarouselController();
   List<dynamic> sliderList = [];
+  final _auth = AuthService();
+  Map<String, dynamic>? data;
+  String address = '';
 
   Widget buildImageCard(String urlImage, int index, String product,
-          int quantity, String productID, double price) =>
+          int quantity, String productID, double price, String address) =>
       Container(
         color: Colors.grey,
         margin: EdgeInsets.symmetric(horizontal: 12.0),
@@ -30,6 +33,7 @@ class _HomePagieState extends State<HomePagie> {
                 'price': price.toString(),
                 'inventory': quantity.toString(),
                 'ID': productID,
+                'address': address
               };
 
               Navigator.pushNamed(context, '/productdetails',
@@ -56,6 +60,19 @@ class _HomePagieState extends State<HomePagie> {
         ),
       );
 
+   //loads address whenever screen starts
+  @override
+  void initState() {
+    super.initState();
+    _auth.userItemRead().then((value) {
+      data = value.data();
+      setState(() {
+        address = data!['address'];
+        print('Initial address read done. #initState #homie.dart');
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -76,36 +93,36 @@ class _HomePagieState extends State<HomePagie> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Order Now'),
-                SizedBox(height: 15.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/signin');
-                          // Navigator.pushReplacementNamed(context, '/signin');
-                        },
-                        child:
-                            OrderCards(img: 'assets/123.jpg', text: 'QR Order'),
-                      ),
-                    ),
-                    Expanded(
-                      child: OrderCards(img: 'assets/333.jpg', text: 'Pickup'),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/delivery');
-                        },
-                        child:
-                            OrderCards(img: 'assets/555.jpg', text: 'Delivery'),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 25.0),
+                // Text('Order Now'),
+                // SizedBox(height: 15.0),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //   children: [
+                //     Expanded(
+                //       child: InkWell(
+                //         onTap: () {
+                //           Navigator.pushNamed(context, '/signin');
+                //           // Navigator.pushReplacementNamed(context, '/signin');
+                //         },
+                //         child:
+                //             OrderCards(img: 'assets/123.jpg', text: 'QR Order'),
+                //       ),
+                //     ),
+                //     Expanded(
+                //       child: OrderCards(img: 'assets/333.jpg', text: 'Pickup'),
+                //     ),
+                //     Expanded(
+                //       child: InkWell(
+                //         onTap: () {
+                //           Navigator.pushNamed(context, '/delivery');
+                //         },
+                //         child:
+                //             OrderCards(img: 'assets/555.jpg', text: 'Delivery'),
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // SizedBox(height: 25.0),
                 Text('What\'s New'),
                 SizedBox(height: 15.0),
                 Column(
@@ -148,7 +165,7 @@ class _HomePagieState extends State<HomePagie> {
                                   snapshot.data!.docs[itemIndex].get('Price');
 
                               return buildImageCard(image, itemIndex, product,
-                                  quantity, productID, price);
+                                  quantity, productID, price, address);
                             },
                           ),
                         ),

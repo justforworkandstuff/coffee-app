@@ -26,14 +26,13 @@ class _OrdersState extends State<Orders> {
   int selectedIndex = 0;
 
   //sample details for product
-  String sampleID = 'Sample-ID';
-  String sampleProductID = 'Sample-Product-ID';
-  String sampleProduct = 'Sample Product';
-  String samplePrice = '0.0';
-  String sampleQuantity = '0';
-  String sampleTime = '01/01/0000';
+  // String sampleID = 'Sample-ID';
+  // String sampleProductID = 'Sample-Product-ID';
+  // String sampleProduct = 'Sample Product';
+  // String samplePrice = '0.0';
+  // String sampleQuantity = '0';
+  // String sampleTime = '01/01/0000';
   double balance = 0.0;
-  String productImage = '';
   Map<String, dynamic>? data2;
 
   //checkout stuff
@@ -41,13 +40,6 @@ class _OrdersState extends State<Orders> {
 
   DropdownMenuItem<String> orderMenu(String value) =>
       DropdownMenuItem(child: Text(value), value: value);
-
-  //getproductimage function
-  Future readProductImage(String docID) async {
-    await _auth.readProductImage(docID).then((value) {
-      setState(() => productImage = value.data()['image']);
-    });
-  }
 
   //when clicked, swap to orders/shipping
   void showShipping() {
@@ -213,6 +205,9 @@ class _OrdersState extends State<Orders> {
                 final Map<String, dynamic> dataMap =
                     dataSnapshot!.data() as Map<String, dynamic>;
 
+                String crtAmt = dataSnapshot['cartAmount'].toStringAsFixed(2);
+                double crtAmtConverted = double.parse(crtAmt);
+
                 //orders
                 final List<Map<String, dynamic>> orderList =
                     (dataMap['cart'] as List)
@@ -233,225 +228,402 @@ class _OrdersState extends State<Orders> {
                         .toList();
 
                 return DefaultTabController(
-                  length: 3,
-                  child: Scaffold(
-                    appBar: TabBar(
-                      onTap: (int index) {
-                        setState(() => selectedIndex = index);
-                      },
-                      tabs: [
-                        Tab(
-                            icon:
-                                Icon(Icons.shopping_cart, color: Colors.black)),
-                        Tab(
-                            icon: Icon(Icons.local_shipping,
-                                color: Colors.black)),
-                        Tab(icon: Icon(Icons.history, color: Colors.black)),
-                      ],
-                    ),
-                    body: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: TabBarView(
-                        children: [
-                          //order tab ///////////////////////////////////////
-                          Column(
-                            children: [
-                              Padding(
+                    length: 3,
+                    child: Scaffold(
+                      appBar: TabBar(
+                        onTap: (int index) =>
+                            setState(() => selectedIndex = index),
+                        tabs: [
+                          Tab(
+                              icon: Icon(Icons.shopping_cart,
+                                  color: Colors.black)),
+                          Tab(
+                              icon: Icon(Icons.local_shipping,
+                                  color: Colors.black)),
+                          Tab(icon: Icon(Icons.history, color: Colors.black)),
+                        ],
+                      ),
+                      body: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: TabBarView(
+                          children: [
+                            /// order tab /////////////////////////
+                            Column(
+                              children: [
+                                Padding(
                                   padding: EdgeInsets.only(top: 15.0),
-                                  child: Text(
-                                      'Current Cart Amount: ${dataSnapshot['cartAmount'].toString()}')),
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: orderList.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(top: 10.0),
-                                      child: Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                        child: ListTile(
-                                          onTap: () async {
-                                            await readProductImage(
-                                                orderList[index]['Product-ID']);
-                                            final Map<String, String> orderMap =
-                                                {
-                                              'id': orderList[index]['ID'] ??
-                                                  sampleID,
-                                              'price': orderList[index]
-                                                      ['Price'] ??
-                                                  samplePrice,
-                                              'product-ID': orderList[index]
-                                                      ['Product-ID'] ??
-                                                  sampleProductID,
-                                              'product': orderList[index]
-                                                      ['Product'] ??
-                                                  sampleProduct,
-                                              'quantity': orderList[index]
-                                                      ['Quantity'] ??
-                                                  sampleQuantity,
-                                              'timestamp': orderList[index]
-                                                      ['Ordered'] ??
-                                                  sampleTime,
-                                              'balance': balance.toString(),
-                                              'image': productImage,
-                                              'address': userAddress,
-                                            };
-                                            Navigator.pushNamed(
-                                                context, '/orderdetails',
-                                                arguments: orderMap);
-                                            // .then((_) => manualRefresh());
-                                          },
-                                          title: Text(
-                                              'Order ID: \n\n ${orderList[index]['ID']}\n'),
-                                          subtitle: Text(
-                                              'Ordered: ${orderList[index]['Ordered']}'),
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                  child: Text('Current Cart Amount: $crtAmt'),
                                 ),
-                              ),
-                            ],
-                          ),
-                          //shipment tab ///////////////////////////////////////
-                          ListView.builder(
-                            itemCount: shipmentList.length,
-                            itemBuilder: (context, index) {
-                              isShipped = shipmentList[index]['Shipped'];
+                                Expanded(
+                                  child: ListView.builder(
+                                      itemCount: orderList.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(top: 10.0),
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: InkWell(
+                                              onTap: () {
+                                                final Map<String, String>
+                                                    orderMap = {
+                                                  'id': orderList[index]['ID'],
+                                                  'price': orderList[index]
+                                                      ['Price'],
+                                                  'product-ID': orderList[index]
+                                                      ['Product-ID'],
+                                                  'product': orderList[index]
+                                                      ['Product'],
+                                                  'quantity': orderList[index]
+                                                      ['Quantity'],
+                                                  'timestamp': orderList[index]
+                                                      ['Ordered'],
+                                                  'balance': balance.toString(),
+                                                  'image': orderList[index]
+                                                      ['Product-Image'],
+                                                  'address': userAddress,
+                                                };
+                                                Navigator.pushNamed(
+                                                    context, '/orderdetails',
+                                                    arguments: orderMap);
+                                                // .then((_) => manualRefresh());
+                                              },
+                                              child: Container(
+                                                height: 80.0,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          flex: 2,
+                                                          child: Container(
+                                                            height: 70.0,
+                                                            width: 70.0,
+                                                            child: Image.network(
+                                                                orderList[index]
+                                                                    [
+                                                                    'Product-Image']),
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 15.0),
+                                                        Expanded(
+                                                          flex: 4,
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Column(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Text(
+                                                                        orderList[index]
+                                                                            [
+                                                                            'Product'],
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                          width:
+                                                                              35.0),
+                                                                      Text(orderList[
+                                                                              index]
+                                                                          [
+                                                                          'Price']),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Expanded(
+                                                          flex: 4,
+                                                          child: Text(
+                                                              orderList[index]
+                                                                  ['Ordered']),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                ),
+                              ],
+                            ),
+                            //shipment tab ///////////////////////////////////////
+                            ListView.builder(
+                              itemCount: shipmentList.length,
+                              itemBuilder: (context, index) {
+                                isShipped = shipmentList[index]['Shipped'];
 
-                              return Padding(
-                                padding: EdgeInsets.only(top: 10.0),
-                                child: Card(
-                                  child: ListTile(
-                                      onTap: () async {
-                                        await readProductImage(
-                                            shipmentList[index]['Product-ID']);
+                                return Padding(
+                                  padding: EdgeInsets.only(top: 10.0),
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
                                         final Map<String, String> shipMap = {
-                                          'id': shipmentList[index]['ID'] ??
-                                              sampleID,
-                                          'price': shipmentList[index]
-                                                  ['Price'] ??
-                                              samplePrice,
+                                          'id': shipmentList[index]['ID'],
+                                          'price': shipmentList[index]['Price'],
                                           'product-ID': shipmentList[index]
-                                                  ['Product-ID'] ??
-                                              sampleProductID,
+                                              ['Product-ID'],
                                           'product': shipmentList[index]
-                                                  ['Product'] ??
-                                              sampleProduct,
+                                              ['Product'],
                                           'quantity': shipmentList[index]
-                                                  ['Quantity'] ??
-                                              sampleQuantity,
+                                              ['Quantity'],
                                           'status': shipmentList[index]
                                                   ['Shipped']
                                               .toString(),
                                           'ordered': shipmentList[index]
                                               ['Ordered'],
                                           'address': userAddress,
-                                          'image': productImage,
+                                          'image': shipmentList[index]
+                                              ['Product-Image'],
                                         };
                                         Navigator.pushNamed(
                                             context, '/shipmentdetails',
                                             arguments: shipMap);
                                         // .then((_) => manualRefresh());
                                       },
-                                      title: Text(
-                                          'Shipment ID: \n\n ${shipmentList[index]['ID']}\n'),
-                                      subtitle: isShipped
-                                          ? Text(
-                                              'Status: Already shipped, please confirm.',
-                                              style: TextStyle(
-                                                  color: Colors.green,
-                                                  fontWeight: FontWeight.bold),
-                                            )
-                                          : Text(
-                                              'Status: Not shipped',
-                                              style: TextStyle(
-                                                  color: Colors.red,
-                                                  fontWeight: FontWeight.bold),
-                                            )),
-                                ),
-                              );
-                            },
-                          ),
-                          //history tab ///////////////////////////////////////
-                          ListView.builder(
-                            itemCount: historyList.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: EdgeInsets.only(top: 10.0),
-                                child: Card(
-                                  child: ListTile(
-                                    onTap: () async {
-                                      await readProductImage(
-                                          historyList[index]['Product-ID']);
-                                      final Map<String, String> historyMap = {
-                                        'id': historyList[index]['ID'] ??
-                                            sampleID,
-                                        'price': historyList[index]['Price'] ??
-                                            samplePrice,
-                                        'product-ID': historyList[index]
-                                                ['Product-ID'] ??
-                                            sampleProductID,
-                                        'product': historyList[index]
-                                                ['Product'] ??
-                                            sampleProduct,
-                                        'quantity': historyList[index]
-                                                ['Quantity'] ??
-                                            sampleQuantity,
-                                        'timestamp': historyList[index]
-                                                ['Received'] ??
-                                            sampleTime,
-                                        'address': userAddress,
-                                        'image': productImage,
-                                      };
-
-                                      Navigator.pushNamed(
-                                          context, '/historydetails',
-                                          arguments: historyMap);
-                                      // .then((_) => manualRefresh());
-                                    },
-                                    title: Text(
-                                        'History ID: \n\n ${historyList[index]['ID']}\n'),
-                                    subtitle: Text(
-                                      'Received: ${historyList[index]['Received']}',
-                                      style: TextStyle(
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold,
+                                      child: Container(
+                                        height: 80.0,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Container(
+                                                    height: 70.0,
+                                                    width: 70.0,
+                                                    child: Image.network(
+                                                        shipmentList[index]
+                                                            ['Product-Image']),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 15.0),
+                                                Expanded(
+                                                  flex: 4,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                shipmentList[
+                                                                        index]
+                                                                    ['Product'],
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 35.0),
+                                                              Text(shipmentList[
+                                                                      index]
+                                                                  ['Price']),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 4,
+                                                  child: isShipped
+                                                      ? Text(
+                                                          'Status: Shipped',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.green,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        )
+                                                      : Text(
+                                                          'Status: Not shipped',
+                                                          style: TextStyle(
+                                                              color: Colors.red,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          )
-                        ],
+                                );
+                              },
+                            ),
+                            //history tab ///////////////////////////////////////
+                            ListView.builder(
+                              itemCount: historyList.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: EdgeInsets.only(top: 10.0),
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        final Map<String, String> historyMap = {
+                                          'id': historyList[index]['ID'],
+                                          'price': historyList[index]['Price'],
+                                          'product-ID': historyList[index]
+                                              ['Product-ID'],
+                                          'product': historyList[index]
+                                              ['Product'],
+                                          'quantity': historyList[index]
+                                              ['Quantity'],
+                                          'timestamp': historyList[index]
+                                              ['Received'],
+                                          'address': userAddress,
+                                          'image': historyList[index]
+                                              ['Product-Image'],
+                                        };
+
+                                        Navigator.pushNamed(
+                                            context, '/historydetails',
+                                            arguments: historyMap);
+                                        // .then((_) => manualRefresh());
+                                      },
+                                      child: Container(
+                                        height: 80.0,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Container(
+                                                    height: 70.0,
+                                                    width: 70.0,
+                                                    child: Image.network(
+                                                        historyList[index]
+                                                            ['Product-Image']),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 15.0),
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                historyList[
+                                                                        index]
+                                                                    ['Product'],
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 35.0),
+                                                              Text(historyList[
+                                                                      index]
+                                                                  ['Price']),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 5,
+                                                  child: Text(
+                                                    'Received: ${historyList[index]['Received']}',
+                                                    style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    bottomNavigationBar: selectedIndex == 0
-                        ? Row(
-                            children: [
-                              Expanded(
-                                flex: 5,
-                                child: dataSnapshot['cartAmount'] != 0.0
-                                    ? ElevatedButton(
-                                        onPressed: () {
-                                          confirmDialog(context,
-                                              dataSnapshot['cartAmount']);
-                                        },
-                                        child: Text('Check Out All Orders'))
-                                    : ElevatedButton(
-                                        onPressed: null,
-                                        child: Text('Check Out All Orders')),
-                              ),
-                            ],
-                          )
-                        : null,
-                  ),
-                );
+                      bottomNavigationBar: selectedIndex == 0
+                          ? Row(
+                              children: [
+                                Expanded(
+                                  flex: 5,
+                                  child: crtAmtConverted > 0.0
+                                      ? ElevatedButton(
+                                          onPressed: () {
+                                            confirmDialog(
+                                                context, crtAmtConverted);
+                                          },
+                                          child: Text('Check Out All Orders'))
+                                      : ElevatedButton(
+                                          onPressed: null,
+                                          child: Text('Check Out All Orders')),
+                                ),
+                              ],
+                            )
+                          : null,
+                    ));
               }
-            },
-          );
+            });
   }
 }

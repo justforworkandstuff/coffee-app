@@ -24,7 +24,7 @@ class _ProductsState extends State<Products> {
   String productIDData = '';
   String address = '';
 
-  //loads balance whenever screen starts
+  //loads address whenever screen starts
   @override
   void initState() {
     super.initState();
@@ -39,19 +39,6 @@ class _ProductsState extends State<Products> {
       });
     });
   }
-
-  //perform manual refresh on balance
-  // void manualRefresh() {
-  //   setState(() => loading = true);
-  //   _auth.userItemRead().then((value) {
-  //     data = value.data();
-  //     setState(() {
-  //       loading = false;
-  //       balance = data!['balance'];
-  //       print('Balance reload done. #manualRefresh #products.dart');
-  //     });
-  //   });
-  // }
   
   @override
   Widget build(BuildContext context) {
