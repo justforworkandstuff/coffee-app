@@ -1,5 +1,6 @@
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProductDetails extends StatefulWidget {
   const ProductDetails({Key? key}) : super(key: key);
@@ -26,11 +27,12 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   //buy product
   void purchaseClick(String name, double price, int quantity, String productID,
-      bool shipped, bool received, String address) async {
+      bool shipped, bool received, String address, String image) async {
     await _auth
-        .makeOrder(name, price, quantity, productID, shipped, address)
+        .makeOrder(name, price, quantity, productID, shipped, address, image)
         .whenComplete(() {
-      print('Purchased done. #purchaseClick #productdetails.dart');
+      print('Order done. #purchaseClick #productdetails.dart');
+      Fluttertoast.showToast(msg: 'Ordered successfully.');
       Navigator.pop(context);
     });
   }
@@ -199,7 +201,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 if (quantityCounter > 0) {
                   totalAmount = double.parse(priceKey!) * quantityCounter;
                   purchaseClick(productKey!, totalAmount, quantityCounter,
-                      productIDKey!, false, false, addressKey!);
+                      productIDKey!, false, false, addressKey!, imageKey!);
                 } else {
                   setState(
                       () => quantityError = 'You need to select a quantity.');

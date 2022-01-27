@@ -25,28 +25,30 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
   Widget build(BuildContext context) {
     final selectedShipmentData =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    
     idKey = selectedShipmentData['id'];
     priceKey = selectedShipmentData['price'];
-    productIDKey = selectedShipmentData['product-ID'];
     productKey = selectedShipmentData['product'];
     quantityKey = selectedShipmentData['quantity'];
     statusKey = selectedShipmentData['status'];
     orderedKey = selectedShipmentData['ordered'];
     addressKey = selectedShipmentData['address'];
     imageKey = selectedShipmentData['image'];
+    productIDKey = selectedShipmentData['product-ID'];
 
     //received order
     void receivedOrder(
-        String productID,
+      String productID,
         String productName,
         double productPrice,
         String id,
         int quantity,
         String ordered,
-        String address) async {
+        String address,
+        String image) async {
       if (statusKey == 'true') {
         await _auth.receivedShipmentFields(productID, productName, productPrice,
-            id, quantity, ordered, address);
+            id, quantity, ordered, address, image);
 
         Navigator.pop(context);
         print('Received shipment done. #receivedOrder #shipmentdetails.dart');
@@ -268,13 +270,13 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
                 ? ElevatedButton(
                     onPressed: () async {
                       receivedOrder(
-                          productIDKey!,
+                        productIDKey!,
                           productKey!,
                           double.parse(priceKey!),
                           idKey!,
                           int.parse(quantityKey!),
                           orderedKey!,
-                          addressKey!);
+                          addressKey!, imageKey!);
                     },
                     child: Text('Confirm Received Shipment'),
                   )
