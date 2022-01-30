@@ -23,17 +23,23 @@ class _SignInState extends State<SignIn> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _nameController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
-  TextEditingController _addressController = TextEditingController();
+  TextEditingController _streetController = TextEditingController();
+  TextEditingController _cityController = TextEditingController();
+  TextEditingController _postCodeController = TextEditingController();
 
   bool loading = false;
   String error = '';
   bool toggleSignIn = true;
   bool toggleRegister = false;
 
+  //user details variable
   String email = '';
   String password = '';
   String userName = '';
-  String address = '';
+  String street = '';
+  String city = '';
+  String state = 'Johor';
+  int postcode = 11111;
   int orders = 0;
   int phoneNo = 123456789;
   File? image;
@@ -119,7 +125,9 @@ class _SignInState extends State<SignIn> {
       _passwordController.clear();
       _nameController.clear();
       _phoneController.clear();
-      _addressController.clear();
+      _streetController.clear();
+      _cityController.clear();
+      _postCodeController.clear();
     });
   }
 
@@ -250,6 +258,7 @@ class _SignInState extends State<SignIn> {
                           ),
                         ),
                         SizedBox(height: 15.0),
+                        //phone number
                         Visibility(
                           visible: toggleRegister,
                           child: TextFormField(
@@ -258,6 +267,7 @@ class _SignInState extends State<SignIn> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
                             ],
+                            keyboardType: TextInputType.number,
                             decoration: textFormFieldDecoration.copyWith(
                                 hintText: 'Register your phone number.'),
                             validator: (val) {
@@ -265,8 +275,7 @@ class _SignInState extends State<SignIn> {
                                 return 'Please enter your phone number';
                               } else if (val.length < 9) {
                                 return 'Minimum length = 9.';
-                              } else if (val.startsWith('0'))
-                              {
+                              } else if (val.startsWith('0')) {
                                 return '0 must not be starting digit.';
                               }
                             },
@@ -278,25 +287,94 @@ class _SignInState extends State<SignIn> {
                           ),
                         ),
                         SizedBox(height: 15.0),
+                        //street address start
                         Visibility(
                           visible: toggleRegister,
                           child: TextFormField(
-                            maxLength: 100,
-                            maxLines: 3,
-                            controller: _addressController,
+                            maxLength: 50,
+                            maxLines: 1,
+                            controller: _streetController,
                             decoration: textFormFieldDecoration.copyWith(
-                                hintText: 'Register your address.'),
+                                hintText: 'Register your street.'),
                             validator: (val) => val!.isEmpty
-                                ? 'Please enter your address.'
+                                ? 'Please enter your street.'
                                 : null,
                             onChanged: ((val) {
                               setState(() {
-                                address = val;
+                                street = val;
+                              });
+                            }),
+                          ),
+                        ),
+                        //city
+                        Visibility(
+                          visible: toggleRegister,
+                          child: TextFormField(
+                            maxLength: 15,
+                            maxLines: 1,
+                            controller: _cityController,
+                            decoration: textFormFieldDecoration.copyWith(
+                                hintText: 'Register your city.'),
+                            validator: (val) =>
+                                val!.isEmpty ? 'Please enter your city.' : null,
+                            onChanged: ((val) {
+                              setState(() {
+                                city = val;
+                              });
+                            }),
+                          ),
+                        ),
+                        //state
+                        Visibility(
+                          visible: toggleRegister,
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: state,
+                            items: states.map((val) {
+                              return DropdownMenuItem(
+                                value: val,
+                                child: Text(val),
+                              );
+                            }).toList(),
+                            onChanged: (newVal) {
+                              setState(() => state = newVal!);
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        //postcode
+                        Visibility(
+                          visible: toggleRegister,
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            maxLength: 5,
+                            controller: _postCodeController,
+                            decoration: textFormFieldDecoration.copyWith(
+                                hintText: 'Register your post code.'),
+                            validator: (val) {
+                              if(val!.isEmpty)
+                              {
+                                return 'Please enter your post code.';
+                              }
+                              else if(val.length < 5)
+                              {
+                                return 'Length = 5';
+                              }
+                              else if(val.startsWith('0'))
+                              {
+                                return '0 must not be starting digit.';
+                              }
+                            },
+                            onChanged: ((val) {
+                              setState(() {
+                                postcode = int.parse(val);
                               });
                             }),
                           ),
                         ),
                         SizedBox(height: 15.0),
+                        //button
                         Center(
                           child: Visibility(
                             visible: toggleSignIn,
@@ -334,11 +412,14 @@ class _SignInState extends State<SignIn> {
                                   dynamic result = await _auth.userRegister(
                                       email,
                                       password,
-                                      address,
                                       orders,
                                       userName,
                                       phoneNo,
-                                      '');
+                                      '',
+                                      street,
+                                      city,
+                                      state,
+                                      postcode);
                                   dynamic result2 = await uploadFile(image!);
                                   if (result == null && result2 == null) {
                                     setState(() {
@@ -360,6 +441,7 @@ class _SignInState extends State<SignIn> {
                           ),
                         ),
                         SizedBox(height: 15.0),
+                        //text change
                         Center(
                           child: Visibility(
                             visible: toggleSignIn,
