@@ -34,7 +34,7 @@ class _ProductsState extends State<Products> {
       setState(() {
         loading = false;
         // balance = data!['balance'];
-        address = data!['address'];
+        address = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print('Initial address read done. #initState #products.dart');
       });
     });

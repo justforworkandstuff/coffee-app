@@ -12,16 +12,27 @@ class DatabaseService {
   final productList = FirebaseFirestore.instance.collection('Products');
 
   //register new set of user
-  Future newUserData(double balance, String address, int orders,
-      String userName, int phoneNo, String image) async {
+  Future newUserData(
+      double balance,
+      int orders,
+      String userName,
+      int phoneNo,
+      String image,
+      String street,
+      String city,
+      String state,
+      int postcode) async {
     return await userList.doc(uid).set({
       'balance': balance,
-      'address': address,
       'orders': orders,
       'userName': userName,
       'phoneNo': phoneNo,
       'image': image,
       'orderID': uid + 'ORDERID',
+      'street-name': street,
+      'city': city,
+      'state': state,
+      'postcode': postcode
     }).then((value) async {
       String orderID = uid + 'ORDERID';
       await orderList.doc(orderID).set({
@@ -49,20 +60,41 @@ class DatabaseService {
     return await userList.doc(uid).update({'phoneNo': phoneNo});
   }
 
-  //update user address
-  Future updateAddress(String? address) async {
-    return await userList.doc(uid).update({'address': address});
+  //update user street
+  Future updateStreet(String? street) async {
+    return await userList.doc(uid).update(
+      {
+        'street-name': street,
+      },
+    );
   }
 
-  //subtract balance
-  // Future minusBalance(double balance, double price) async {
-  //   double newBalance = balance - price;
-  //   double abcde = double.parse(newBalance.toStringAsFixed(2));
+  //update user state
+  Future updateState(String? state) async {
+    return await userList.doc(uid).update(
+      {
+        'state': state,
+      },
+    );
+  }
 
-  //   return await userList.doc(uid).update({
-  //     'balance': abcde,
-  //   });
-  // }
+  //update user city
+  Future updateCity(String? city) async {
+    return await userList.doc(uid).update(
+      {
+        'city': city,
+      },
+    );
+  }
+
+  //update user postcode
+  Future updatePostCode(int? postcode) async {
+    return await userList.doc(uid).update(
+      {
+        'postcode': postcode,
+      },
+    );
+  }
 
   //reading user Lists
   Future readUsers() async {

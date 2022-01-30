@@ -32,8 +32,8 @@ class AuthService {
   }
 
   //register w/ email and pass
-  Future userRegister(String email, String password, String address, int orders,
-      String userName, int phoneNo, String image) async {
+  Future userRegister(String email, String password, int orders,
+      String userName, int phoneNo, String image, String street, String city, String state, int postcode) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -41,7 +41,7 @@ class AuthService {
 
       double balance = double.parse(0.00.toStringAsFixed(2));
       await DatabaseService(uid: result.user!.uid)
-          .newUserData(balance, address, orders, userName, phoneNo, image);
+          .newUserData(balance, orders, userName, phoneNo, image, street, city, state, postcode);
       return _userFromFirebase(customUser);
     } catch (e) {
       print(e.toString());
@@ -117,11 +117,44 @@ class AuthService {
     }
   }
 
-  //updating user address
-  Future userAddressUpdate(String? address) async {
+  //updating user street
+  Future userStreetUpdate(String? street) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .updateAddress(address);
+          .updateStreet(street);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //updating user State
+  Future userStateUpdate(String? state) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .updateState(state);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //updating user city
+  Future userCityUpdate(String? city) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .updateCity(city);
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //updating user address
+  Future userPostCodeUpdate(int? postcode) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .updatePostCode(postcode);
     } catch (e) {
       print(e.toString());
       return null;

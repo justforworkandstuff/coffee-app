@@ -56,7 +56,7 @@ class _OrdersState extends State<Orders> {
       setState(() {
         loading = false;
         balance = data!['balance'];
-        userAddress = data!['address'];
+        userAddress = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print('Initial read balance and address done #initState #orders.dart');
       });
     });
@@ -70,7 +70,7 @@ class _OrdersState extends State<Orders> {
       setState(() {
         loading = false;
         balance = data!['balance'];
-        userAddress = data!['address'];
+        userAddress = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print(
             'Manual refresh balance and address done #manualRefresh #orders.dart');
       });

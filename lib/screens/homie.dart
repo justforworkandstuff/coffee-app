@@ -17,7 +17,7 @@ class _HomePagieState extends State<HomePagie> {
   List<dynamic> sliderList = [];
   final _auth = AuthService();
   Map<String, dynamic>? data;
-  String address = '';
+  late String address;
 
   Widget buildImageCard(String urlImage, int index, String product,
           int quantity, String productID, double price, String address) =>
@@ -67,7 +67,7 @@ class _HomePagieState extends State<HomePagie> {
     _auth.userItemRead().then((value) {
       data = value.data();
       setState(() {
-        address = data!['address'];
+        address = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print('Initial address read done. #initState #homie.dart');
       });
     });
@@ -93,36 +93,6 @@ class _HomePagieState extends State<HomePagie> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Text('Order Now'),
-                // SizedBox(height: 15.0),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //   children: [
-                //     Expanded(
-                //       child: InkWell(
-                //         onTap: () {
-                //           Navigator.pushNamed(context, '/signin');
-                //           // Navigator.pushReplacementNamed(context, '/signin');
-                //         },
-                //         child:
-                //             OrderCards(img: 'assets/123.jpg', text: 'QR Order'),
-                //       ),
-                //     ),
-                //     Expanded(
-                //       child: OrderCards(img: 'assets/333.jpg', text: 'Pickup'),
-                //     ),
-                //     Expanded(
-                //       child: InkWell(
-                //         onTap: () {
-                //           Navigator.pushNamed(context, '/delivery');
-                //         },
-                //         child:
-                //             OrderCards(img: 'assets/555.jpg', text: 'Delivery'),
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                // SizedBox(height: 25.0),
                 Text('What\'s New'),
                 SizedBox(height: 15.0),
                 Column(

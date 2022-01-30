@@ -18,3 +18,22 @@ const textFormFieldDecoration = InputDecoration(
 );
 
 const List colors = [Colors.red, Colors.blue, Colors.yellow];
+
+const List<String> states = [
+  'Johor',
+  'Kelantan',
+  'Kedah',
+  'Malacca',
+  'Negeri Sembilan',
+  'Pahang',
+  'Perak',
+  'Penang',
+  'Perlis',
+  'Selangor',
+  'Terengganu',
+  'Sabah',
+  'Sarawak',
+  'Kuala Lumpur',
+  'Labuan',
+  'Putrajaya'
+];
