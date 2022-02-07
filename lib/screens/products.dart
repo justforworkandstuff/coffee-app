@@ -16,9 +16,8 @@ class _ProductsState extends State<Products> {
   Map<String, dynamic>? data;
 
   //data to be loaded
-  // double balance = 0.0;
   String productData = '';
-  double priceData = 0.0;
+  double priceData = 0;
   String imageData = '';
   int inventoryData = 0;
   String productIDData = '';
@@ -33,7 +32,6 @@ class _ProductsState extends State<Products> {
       data = value.data();
       setState(() {
         loading = false;
-        // balance = data!['balance'];
         address = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print('Initial address read done. #initState #products.dart');
       });
@@ -109,43 +107,3 @@ class _ProductsState extends State<Products> {
     );
   }
 }
-
-
-// Container(
-//                 padding: const EdgeInsets.symmetric(vertical: 15.0),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     SizedBox(
-//                       height: 30.0,
-//                       child: ListView.builder(
-//                           scrollDirection: Axis.horizontal,
-//                           itemCount: categories.length,
-//                           itemBuilder: (context, index) {
-//                             return GestureDetector(
-//                               onTap: () {
-//                                 setState(() => selectedIndex = index);  
-//                               },
-//                               child: Padding(
-//                                 padding:
-//                                     const EdgeInsets.symmetric(horizontal: 15.0),
-//                                 child: Column(
-//                                   children: [
-//                                     Text(
-//                                       categories[index],
-//                                       style: TextStyle(
-//                                         fontWeight: FontWeight.bold,
-//                                         color: selectedIndex == index ? Colors.black : Colors.grey,
-//                                       ),
-//                                     ),
-//                                     Container(
-//                                       height: 2.0,
-//                                       width: 30.0,
-//                                       color: selectedIndex == index ? Colors.black : Colors.transparent,
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ),
-//                             );
-//                           }),
-//                     ),

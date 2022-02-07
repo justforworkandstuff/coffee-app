@@ -24,22 +24,11 @@ class _OrdersState extends State<Orders> {
   bool isShipped = false;
   String userAddress = '';
   int selectedIndex = 0;
-
-  //sample details for product
-  // String sampleID = 'Sample-ID';
-  // String sampleProductID = 'Sample-Product-ID';
-  // String sampleProduct = 'Sample Product';
-  // String samplePrice = '0.0';
-  // String sampleQuantity = '0';
-  // String sampleTime = '01/01/0000';
   double balance = 0.0;
   Map<String, dynamic>? data2;
 
   //checkout stuff
   List<Map<String, dynamic>> checkOutCart = [];
-
-  DropdownMenuItem<String> orderMenu(String value) =>
-      DropdownMenuItem(child: Text(value), value: value);
 
   //when clicked, swap to orders/shipping
   void showShipping() {
@@ -56,7 +45,8 @@ class _OrdersState extends State<Orders> {
       setState(() {
         loading = false;
         balance = data!['balance'];
-        userAddress = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
+        userAddress =
+            '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print('Initial read balance and address done #initState #orders.dart');
       });
     });
@@ -70,23 +60,24 @@ class _OrdersState extends State<Orders> {
       setState(() {
         loading = false;
         balance = data!['balance'];
-        userAddress = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
+        userAddress =
+            '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print(
             'Manual refresh balance and address done #manualRefresh #orders.dart');
       });
     });
   }
 
-  //checkout
+  //checkout all orders
   void checkOut(BuildContext context, double cartAmount,
       List<Map<String, dynamic>> finalOrderList) async {
     await _auth.cartCheckOutAll(cartAmount, finalOrderList);
-    print('Check out successful.');
+    print('Check out successful. #checkOut #orders.dart');
     Navigator.pop(context);
   }
 
   //confirm checkout dialog
-  void confirmDialog(BuildContext context, double cartAmount) {
+  void confirmCheckOutDialog(BuildContext context, double cartAmount) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -290,6 +281,7 @@ class _OrdersState extends State<Orders> {
                                                     arguments: orderMap);
                                                 // .then((_) => manualRefresh());
                                               },
+                                              // listtile of each order 
                                               child: Container(
                                                 height: 80.0,
                                                 child: Column(
@@ -298,6 +290,7 @@ class _OrdersState extends State<Orders> {
                                                   children: [
                                                     Row(
                                                       children: [
+                                                        // image
                                                         Expanded(
                                                           flex: 2,
                                                           child: Container(
@@ -310,6 +303,7 @@ class _OrdersState extends State<Orders> {
                                                           ),
                                                         ),
                                                         SizedBox(width: 15.0),
+                                                        // name and price 
                                                         Expanded(
                                                           flex: 4,
                                                           child: Column(
@@ -348,6 +342,7 @@ class _OrdersState extends State<Orders> {
                                                             ],
                                                           ),
                                                         ),
+                                                        // date time
                                                         Expanded(
                                                           flex: 4,
                                                           child: Text(
@@ -607,11 +602,10 @@ class _OrdersState extends State<Orders> {
                           ? Row(
                               children: [
                                 Expanded(
-                                  flex: 5,
                                   child: crtAmtConverted > 0.0
                                       ? ElevatedButton(
                                           onPressed: () {
-                                            confirmDialog(
+                                            confirmCheckOutDialog(
                                                 context, crtAmtConverted);
                                           },
                                           child: Text('Check Out All Orders'))

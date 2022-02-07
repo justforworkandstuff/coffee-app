@@ -165,22 +165,22 @@ class AuthService {
   //// Orders
   ////////////////////////////////////////////////////////////////////////////////////
 
-  //buying order items
-  Future makeOrder(String productName, double productPrice, int quantity,
-      String productID, bool shipped, String address, String image) async {
+  //read order fields
+  Future readOrderFields() async {
     try {
-      return await DatabaseService(uid: _auth.currentUser!.uid).placeOrder(
-          productName, productPrice, quantity, productID, shipped, address, image);
+      return await DatabaseService(uid: _auth.currentUser!.uid).readOrder();
     } catch (e) {
       print(e.toString());
       return null;
     }
   }
 
-  //read order fields
-  Future readOrderFields() async {
+  //buying order items
+  Future makeOrder(String productName, double productPrice, int quantity,
+      String productID, bool shipped, String address, String image) async {
     try {
-      return await DatabaseService(uid: _auth.currentUser!.uid).readOrder();
+      return await DatabaseService(uid: _auth.currentUser!.uid).placeOrder(
+          productName, productPrice, quantity, productID, shipped, address, image);
     } catch (e) {
       print(e.toString());
       return null;
@@ -236,6 +236,27 @@ class AuthService {
       return await DatabaseService(uid: _auth.currentUser!.uid)
           .cartCheckOut(cartAmount, cartList);
     } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  //checkout one cart order 
+  Future cartCheckOutOne(String productID,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String ordered,
+      String address,
+      String productImage) async
+  {
+    try
+    {
+      return await DatabaseService(uid: _auth.currentUser!.uid).cartCheckOutOne(productID, productName, productPrice, id, quantity, ordered, address, productImage);
+    }
+    catch (e)
+    {
       print(e.toString());
       return null;
     }

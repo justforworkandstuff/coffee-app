@@ -112,6 +112,11 @@ class DatabaseService {
   /// Orders
   ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  //read order fields in orderList
+  Future readOrder() async {
+    return await orderList.doc(uid + 'ORDERID').get();
+  }
+
   var uuid = Uuid();
 
   //place order
@@ -150,11 +155,6 @@ class DatabaseService {
             'orders': FieldValue.increment(1),
           });
         });
-  }
-
-  //read order fields in orderList
-  Future readOrder() async {
-    return await orderList.doc(uid + 'ORDERID').get();
   }
 
   //delete single order field
@@ -239,7 +239,7 @@ class DatabaseService {
     });
   }
 
-  //check out cart orders
+  //check out all cart orders
   Future cartCheckOut(
       double cartAmount, List<Map<String, dynamic>> cartList) async {
     return await orderList.doc(uid + 'ORDERID').update({
@@ -252,6 +252,54 @@ class DatabaseService {
         'balance':
             FieldValue.increment(-double.parse(cartAmount.toStringAsFixed(2))),
         'orders': 0,
+      });
+    });
+  }
+
+  //check out one cart order
+  Future cartCheckOutOne(
+      String productID,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String ordered,
+      String address,
+      String productImage) async {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'cartAmount':
+          FieldValue.increment(-double.parse(productPrice.toStringAsFixed(2))),
+      'cart': FieldValue.arrayRemove([
+        {
+          'Product-ID': productID,
+          'Product-Image': productImage,
+          'Product': productName,
+          'Price': productPrice.toStringAsFixed(2),
+          'ID': id,
+          'Quantity': quantity.toString(),
+          'Ordered': ordered,
+          'Shipped': false,
+          'Address': address,
+        }
+      ]),
+      'shipment': FieldValue.arrayUnion([
+        {
+          'Product-ID': productID,
+          'ID': id,
+          'Ordered': ordered,
+          'Price': productPrice.toStringAsFixed(2),
+          'Product': productName,
+          'Product-Image': productImage,
+          'Quantity': quantity.toString(),
+          'Shipped': false,
+          'Address': address,
+        }
+      ]),
+    }).then((value) async {
+      await userList.doc(uid).update({
+        'balance': FieldValue.increment(
+            -double.parse(productPrice.toStringAsFixed(2))),
+        'orders': FieldValue.increment(-1),
       });
     });
   }
