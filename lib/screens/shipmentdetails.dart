@@ -25,7 +25,7 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
   Widget build(BuildContext context) {
     final selectedShipmentData =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    
+
     idKey = selectedShipmentData['id'];
     priceKey = selectedShipmentData['price'];
     productKey = selectedShipmentData['product'];
@@ -38,21 +38,42 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
 
     //received order
     void receivedOrder(
-      String productID,
+        String productID,
         String productName,
         double productPrice,
         String id,
         int quantity,
         String ordered,
         String address,
-        String image) async {
-      if (statusKey == 'true') {
-        await _auth.receivedShipmentFields(productID, productName, productPrice,
-            id, quantity, ordered, address, image);
+        String image) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Confirmation'),
+              content: Text('Have you received the shipment?'),
+              actions: [
+                MaterialButton(
+                  onPressed: () async {
+                    if (statusKey == 'true') {
+                      await _auth.receivedShipmentFields(productID, productName,
+                          productPrice, id, quantity, ordered, address, image);
 
-        Navigator.pop(context);
-        print('Received shipment done. #receivedOrder #shipmentdetails.dart');
-      }
+                      Navigator.pop(context);
+                      print(
+                          'Received shipment done. #receivedOrder #shipmentdetails.dart');
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text('Yes'),
+                ),
+                MaterialButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('No'),
+                )
+              ],
+            );
+          });
     }
 
     return Scaffold(
@@ -270,13 +291,14 @@ class _ShipmentDetailsState extends State<ShipmentDetails> {
                 ? ElevatedButton(
                     onPressed: () async {
                       receivedOrder(
-                        productIDKey!,
+                          productIDKey!,
                           productKey!,
                           double.parse(priceKey!),
                           idKey!,
                           int.parse(quantityKey!),
                           orderedKey!,
-                          addressKey!, imageKey!);
+                          addressKey!,
+                          imageKey!);
                     },
                     child: Text('Confirm Received Shipment'),
                   )
