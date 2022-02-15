@@ -32,16 +32,25 @@ class AuthService {
   }
 
   //register w/ email and pass
-  Future userRegister(String email, String password, int orders,
-      String userName, int phoneNo, String image, String street, String city, String state, int postcode) async {
+  Future userRegister(
+      String email,
+      String password,
+      int orders,
+      String userName,
+      int phoneNo,
+      String image,
+      String street,
+      String city,
+      String state,
+      int postcode) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User? customUser = result.user;
 
       double balance = double.parse(0.00.toStringAsFixed(2));
-      await DatabaseService(uid: result.user!.uid)
-          .newUserData(balance, orders, userName, phoneNo, image, street, city, state, postcode);
+      await DatabaseService(uid: result.user!.uid).newUserData(balance, orders,
+          userName, phoneNo, image, street, city, state, postcode);
       return _userFromFirebase(customUser);
     } catch (e) {
       print(e.toString());
@@ -180,7 +189,13 @@ class AuthService {
       String productID, bool shipped, String address, String image) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid).placeOrder(
-          productName, productPrice, quantity, productID, shipped, address, image);
+          productName,
+          productPrice,
+          quantity,
+          productID,
+          shipped,
+          address,
+          image);
     } catch (e) {
       print(e.toString());
       return null;
@@ -189,28 +204,28 @@ class AuthService {
 
   //delete order
   Future deleteOrderFields(
-      String id,
-      String productName,
-      double productPrice,
-      String ordered,
-      int quantity,
-      String productID,
-      bool shipped,
-      String address,
-      String image,
-      ) async {
+    String id,
+    String productName,
+    double productPrice,
+    String ordered,
+    int quantity,
+    String productID,
+    bool shipped,
+    String address,
+    String image,
+  ) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid).deleteOrder(
-          id,
-          productName,
-          productPrice,
-          ordered,
-          quantity,
-          productID,
-          shipped,
-          address,
-          image,
-          );
+        id,
+        productName,
+        productPrice,
+        ordered,
+        quantity,
+        productID,
+        shipped,
+        address,
+        image,
+      );
     } catch (e) {
       print(e.toString());
       return null;
@@ -218,11 +233,19 @@ class AuthService {
   }
 
   //received item
-  Future receivedShipmentFields(String productID, String productName, double productPrice,
-  String id, int quantity, String ordered, String address, String image) async {
+  Future receivedShipmentFields(
+      String productID,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String ordered,
+      String address,
+      String image) async {
     try {
       return await DatabaseService(uid: _auth.currentUser!.uid)
-          .receivedShipment(productID, productName, productPrice, id, quantity, ordered, address, image);
+          .receivedShipment(productID, productName, productPrice, id, quantity,
+              ordered, address, image);
     } catch (e) {
       print(e.toString());
       return null;
@@ -241,22 +264,48 @@ class AuthService {
     }
   }
 
-  //checkout one cart order 
-  Future cartCheckOutOne(String productID,
+  //checkout one cart order
+  Future cartCheckOutOne(
+      String productID,
       String productName,
       double productPrice,
       String id,
       int quantity,
       String ordered,
       String address,
-      String productImage) async
-  {
-    try
-    {
-      return await DatabaseService(uid: _auth.currentUser!.uid).cartCheckOutOne(productID, productName, productPrice, id, quantity, ordered, address, productImage);
+      String productImage) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid).cartCheckOutOne(
+          productID,
+          productName,
+          productPrice,
+          id,
+          quantity,
+          ordered,
+          address,
+          productImage);
+    } catch (e) {
+      print(e.toString());
+      return null;
     }
-    catch (e)
-    {
+  }
+
+  //test update rating
+  Future orderRatingUpdate(
+      String productID,
+      String productImage,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String received,
+      String address,
+      double rating) async {
+    try {
+      return await DatabaseService(uid: _auth.currentUser!.uid)
+          .orderRatingChange(productID, productImage, productName, productPrice,
+              id, quantity, received, address, rating);
+    } catch (e) {
       print(e.toString());
       return null;
     }

@@ -4,6 +4,7 @@ import 'package:coffeeproject/models/user.dart';
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:coffeeproject/shared/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class Orders extends StatefulWidget {
@@ -26,6 +27,7 @@ class _OrdersState extends State<Orders> {
   int selectedIndex = 0;
   double balance = 0.0;
   Map<String, dynamic>? data2;
+  Map<String, dynamic> ratingValue = {};
 
   //checkout stuff
   List<Map<String, dynamic>> checkOutCart = [];
@@ -177,6 +179,20 @@ class _OrdersState extends State<Orders> {
         });
   }
 
+  //update rating
+  void updateRating(String productID,
+      String productImage,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String received,
+      String address,
+      double ratingAmt) async {
+    await _auth.orderRatingUpdate(productID, productImage, productName, productPrice, id, quantity, received, address, ratingAmt);
+    print('Rating updated successfully. #updateRating #orders.dart');
+  }
+
   @override
   Widget build(BuildContext context) {
     var _user = Provider.of<CustomUser?>(context);
@@ -281,7 +297,7 @@ class _OrdersState extends State<Orders> {
                                                     arguments: orderMap);
                                                 // .then((_) => manualRefresh());
                                               },
-                                              // listtile of each order 
+                                              // listtile of each order
                                               child: Container(
                                                 height: 80.0,
                                                 child: Column(
@@ -303,7 +319,7 @@ class _OrdersState extends State<Orders> {
                                                           ),
                                                         ),
                                                         SizedBox(width: 15.0),
-                                                        // name and price 
+                                                        // name and price
                                                         Expanded(
                                                           flex: 4,
                                                           child: Column(
@@ -496,7 +512,7 @@ class _OrdersState extends State<Orders> {
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
                                     child: InkWell(
-                                      onTap: () {
+                                      onTap: () async {
                                         final Map<String, String> historyMap = {
                                           'id': historyList[index]['ID'],
                                           'price': historyList[index]['Price'],
@@ -511,12 +527,31 @@ class _OrdersState extends State<Orders> {
                                           'address': userAddress,
                                           'image': historyList[index]
                                               ['Product-Image'],
+                                          'rating': historyList[index]['rating'].toString(), 
                                         };
 
-                                        Navigator.pushNamed(
-                                            context, '/historydetails',
-                                            arguments: historyMap);
-                                        // .then((_) => manualRefresh());
+                                        ratingValue = await Navigator.pushNamed(
+                                                context, '/historydetails',
+                                                arguments: historyMap) as Map<String, dynamic>;
+
+                                        print(ratingValue['rating']);
+                                        print(ratingValue['rated']);
+
+                                        if(ratingValue['rated'] == true)
+                                        {
+                                          Fluttertoast.showToast(msg: 'You have rated the product!');
+                                          updateRating(
+                                            ratingValue['productID'],
+                                            ratingValue['productImage'],
+                                            ratingValue['productName'],
+                                            double.parse(ratingValue['productPrice']),
+                                            ratingValue['id'],
+                                            int.parse(ratingValue['quantity']),
+                                            ratingValue['received'],
+                                            ratingValue['address'],
+                                            ratingValue['rating'],
+                                            );
+                                        }
                                       },
                                       child: Container(
                                         height: 80.0,

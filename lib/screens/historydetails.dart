@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class HistoryDetails extends StatelessWidget {
   const HistoryDetails({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    
     String? idKey;
     String? priceKey;
-    String? productIDKey; 
+    String? productIDKey;
     String? productKey;
     String? quantityKey;
     String? receivedTimeKey;
     String? addressKey;
     String? imageKey;
+    double? rateKey;
+    double ratingNum = 0.0;
 
-    final selectedHistoryData = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+    final selectedHistoryData =
+        ModalRoute.of(context)!.settings.arguments as Map<String, String>;
 
     idKey = selectedHistoryData['id'];
     priceKey = selectedHistoryData['price'];
@@ -25,7 +28,7 @@ class HistoryDetails extends StatelessWidget {
     receivedTimeKey = selectedHistoryData['timestamp'];
     addressKey = selectedHistoryData['address'];
     imageKey = selectedHistoryData['image'];
-    
+    rateKey = double.parse(selectedHistoryData['rating']!);
 
     return Scaffold(
       backgroundColor: Colors.blue[100],
@@ -207,19 +210,45 @@ class HistoryDetails extends StatelessWidget {
                     SizedBox(height: 15.0),
                     Row(
                       children: [
-                        Text('Not available yet ')
+                        Expanded(
+                          child: Center(
+                              child: WillPopScope(
+                            onWillPop: () async {
+                              Navigator.pop(context, {
+                                'productID': productIDKey,
+                                'productImage': imageKey,
+                                'productName': productKey,
+                                'productPrice': priceKey,
+                                'id': idKey,
+                                'quantity': quantityKey,
+                                'received': receivedTimeKey,
+                                'address': addressKey,
+                                'rating': ratingNum,
+                                'rated': ratingNum == 0.0 ? false : true
+                              });
+                              return true;
+                            },
+                            child: RatingBar.builder(
+                              initialRating: rateKey != 0.0 ? rateKey : 0.0,
+                              ignoreGestures: rateKey != 0.0 ? true : false,
+                              minRating: 1,
+                              itemBuilder: (context, _) {
+                                return Icon(Icons.star, color: Colors.yellow);
+                              },
+                              onRatingUpdate: (rating) {
+                                if (rating != ratingNum) {
+                                  ratingNum = rating;
+                                }
+                              },
+                            ),
+                          )),
+                        ),
                       ],
                     ),
                     SizedBox(height: 25.0),
                   ],
                 ),
               ),
-              // Text('Past order ID: $idKey'),
-              // Text('Product ID: $productIDKey'),
-              // Text('Product: $productKey'),
-              // Text('Price: $priceKey'),
-              // Text('Quantity: $quantityKey'),
-              // Text('Received on: $timestampKey'),
             ],
           ),
         ),
