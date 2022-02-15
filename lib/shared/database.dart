@@ -197,7 +197,7 @@ class DatabaseService {
         });
   }
 
-  //received item
+  //received item //history
   Future receivedShipment(
       String productID,
       String productName,
@@ -218,6 +218,8 @@ class DatabaseService {
           'Quantity': quantity.toString(),
           'Received': DateTime.now().toString().substring(0, 16),
           'Address': address,
+          'rating': 0.0,
+          'rated': false,
         }
       ]),
     }).then((value) async {
@@ -233,6 +235,8 @@ class DatabaseService {
             'Quantity': quantity.toString(),
             'Shipped': true,
             'Address': address,
+            'rating': 0.0,
+            'rated': false,
           }
         ]),
       });
@@ -293,6 +297,8 @@ class DatabaseService {
           'Quantity': quantity.toString(),
           'Shipped': false,
           'Address': address,
+          'rating': 0.0,
+          'rated': false,
         }
       ]),
     }).then((value) async {
@@ -300,6 +306,52 @@ class DatabaseService {
         'balance': FieldValue.increment(
             -double.parse(productPrice.toStringAsFixed(2))),
         'orders': FieldValue.increment(-1),
+      });
+    });
+  }
+
+  //test rating update
+  Future orderRatingChange(
+      String productID,
+      String productImage,
+      String productName,
+      double productPrice,
+      String id,
+      int quantity,
+      String received,
+      String address,
+      double rating) async {
+    return await orderList.doc(uid + 'ORDERID').update({
+      'history': FieldValue.arrayRemove([
+        {
+          'Product-ID': productID,
+          'Product-Image': productImage,
+          'Product': productName,
+          'Price': productPrice.toStringAsFixed(2),
+          'ID': id,
+          'Quantity': quantity.toString(),
+          'Received': received,
+          'Address': address,
+          'rating': 0.0,
+          'rated': false,
+        }
+      ])
+    }).then((value) async {
+      await orderList.doc(uid + 'ORDERID').update({
+        'history': FieldValue.arrayUnion([
+          {
+            'Product-ID': productID,
+            'Product-Image': productImage,
+            'Product': productName,
+            'Price': productPrice.toStringAsFixed(2),
+            'ID': id,
+            'Quantity': quantity.toString(),
+            'Received': received,
+            'Address': address,
+            'rating': rating,
+            'rated': true,
+          }
+        ])
       });
     });
   }
