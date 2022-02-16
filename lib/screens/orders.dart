@@ -25,7 +25,7 @@ class _OrdersState extends State<Orders> {
   bool isShipped = false;
   String userAddress = '';
   int selectedIndex = 0;
-  double balance = 0.0;
+  num balance = 0.0;
   Map<String, dynamic>? data2;
   Map<String, dynamic> ratingValue = {};
 

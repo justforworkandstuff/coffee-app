@@ -310,7 +310,7 @@ class DatabaseService {
     });
   }
 
-  //test rating update
+  //user history rating update
   Future orderRatingChange(
       String productID,
       String productImage,
@@ -352,6 +352,11 @@ class DatabaseService {
             'rated': true,
           }
         ])
+      });
+    }).whenComplete(() async {
+      await productList.doc(productID).update({
+        'ratings': FieldValue.increment(1),
+        'productRating': FieldValue.increment(rating),
       });
     });
   }
