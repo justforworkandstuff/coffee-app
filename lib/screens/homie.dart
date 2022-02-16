@@ -51,7 +51,7 @@ class _HomePagieState extends State<HomePagie> {
                   ),
                   Expanded(
                     flex: 1,
-                    child: Text('$product+$index'),
+                    child: Text('$product'),
                   ),
                 ],
               ),
