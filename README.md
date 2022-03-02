@@ -13,7 +13,7 @@ Please note that this is the first project that I have started in the Flutter en
 
 The .gif below shows the general usage of the app. 
 
-![Project-App-Showcase]
+![Project-App-Showcase](https://github.com/justforworkandstuff/coffee-app/blob/master/assets/project-app-showcase.gif)
 
 ## References
 
