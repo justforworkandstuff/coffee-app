@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class HomePagie extends StatefulWidget {
   const HomePagie({Key? key}) : super(key: key);
@@ -17,28 +18,14 @@ class _HomePagieState extends State<HomePagie> {
   List<dynamic> sliderList = [];
   final _auth = AuthService();
   Map<String, dynamic>? data;
-  late String address;
+  String address = 'Null';
 
   Widget buildImageCard(String urlImage, int index, String product,
-          int quantity, String productID, double price, String address) =>
+          int quantity, String productID, double price) =>
       Container(
         color: Colors.grey,
         margin: EdgeInsets.symmetric(horizontal: 12.0),
         child: Card(
-          child: InkWell(
-            onTap: () {
-              final Map<String, String> productDetailsMap = {
-                'image': urlImage,
-                'product': product,
-                'price': price.toString(),
-                'inventory': quantity.toString(),
-                'ID': productID,
-                'address': address
-              };
-
-              Navigator.pushNamed(context, '/productdetails',
-                  arguments: productDetailsMap);
-            },
             child: Card(
               child: Column(
                 children: [
@@ -56,18 +43,18 @@ class _HomePagieState extends State<HomePagie> {
                 ],
               ),
             ),
-          ),
         ),
       );
 
-   //loads address whenever screen starts
+  //loads address whenever screen starts
   @override
   void initState() {
     super.initState();
     _auth.userItemRead().then((value) {
       data = value.data();
       setState(() {
-        address = '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
+        address =
+            '${data!['street-name']}, ${data!['city']}, ${data!['state']}, ${data!['postcode'].toString()}';
         print('Initial address read done. #initState #homie.dart');
       });
     });
@@ -108,6 +95,7 @@ class _HomePagieState extends State<HomePagie> {
                             child: Icon(Icons.arrow_left),
                           ),
                         ),
+                        //carousel slider
                         Expanded(
                           flex: 8,
                           child: CarouselSlider.builder(
@@ -134,8 +122,29 @@ class _HomePagieState extends State<HomePagie> {
                               final price =
                                   snapshot.data!.docs[itemIndex].get('Price');
 
-                              return buildImageCard(image, itemIndex, product,
-                                  quantity, productID, price, address);
+                              return InkWell(
+                                onTap: () {
+                                  final Map<String, String> productDetailsMap =
+                                      {
+                                    'image': image,
+                                    'product': product,
+                                    'price': price.toString(),
+                                    'inventory': quantity.toString(),
+                                    'ID': productID,
+                                    'address': (address == 'Null') ? 'Null' : address
+                                  };
+
+                                  Navigator.pushNamed(
+                                      context, '/productdetails',
+                                      arguments: productDetailsMap);
+                                  if(address == 'Null')
+                                  {
+                                    Fluttertoast.showToast(msg: 'You need to login first to order.'); 
+                                  }  
+                                },
+                                child: buildImageCard(image, itemIndex, product,
+                                    quantity, productID, price),
+                              );
                             },
                           ),
                         ),
@@ -185,7 +194,7 @@ class _HomePagieState extends State<HomePagie> {
                   child: Card(
                     elevation: 5.0,
                     child: Image(
-                      image: AssetImage('assets/invite.webp'),
+                      image: AssetImage('assets/invite.png'),
                       fit: BoxFit.scaleDown,
                     ),
                   ),

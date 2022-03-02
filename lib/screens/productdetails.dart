@@ -195,7 +195,10 @@ class _ProductDetailsState extends State<ProductDetails> {
       bottomNavigationBar: Row(
         children: [
           Expanded(
-            child: ElevatedButton(
+            child: (addressKey == 'Null') ? ElevatedButton(
+              child: Text('Add to Orders'),
+              onPressed: null,
+            ) : ElevatedButton(
               child: Text('Add to Orders'),
               onPressed: () {
                 if (quantityCounter > 0) {

@@ -7,13 +7,19 @@ class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.brown[100],
-      child: Center(
-        child: SpinKitFadingCube(
-          size: 50.0,
-          color: Colors.black,
+      color: Colors.grey[300],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SpinKitFadingCube(
+              size: 50.0,
+              color: Colors.black,
+            ),
+            SizedBox(height: 35.0),
+            Text('User data pending...'),
+          ],
         ),
-      ),
+      
     );
   }
 }

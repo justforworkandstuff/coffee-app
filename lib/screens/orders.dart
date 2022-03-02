@@ -180,7 +180,8 @@ class _OrdersState extends State<Orders> {
   }
 
   //update rating
-  void updateRating(String productID,
+  void updateRating(
+      String productID,
       String productImage,
       String productName,
       double productPrice,
@@ -189,7 +190,8 @@ class _OrdersState extends State<Orders> {
       String received,
       String address,
       double ratingAmt) async {
-    await _auth.orderRatingUpdate(productID, productImage, productName, productPrice, id, quantity, received, address, ratingAmt);
+    await _auth.orderRatingUpdate(productID, productImage, productName,
+        productPrice, id, quantity, received, address, ratingAmt);
     print('Rating updated successfully. #updateRating #orders.dart');
   }
 
@@ -527,30 +529,34 @@ class _OrdersState extends State<Orders> {
                                           'address': userAddress,
                                           'image': historyList[index]
                                               ['Product-Image'],
-                                          'rating': historyList[index]['rating'].toString(), 
+                                          'rating': historyList[index]['rating']
+                                              .toString(),
                                         };
 
                                         ratingValue = await Navigator.pushNamed(
                                                 context, '/historydetails',
-                                                arguments: historyMap) as Map<String, dynamic>;
+                                                arguments: historyMap)
+                                            as Map<String, dynamic>;
 
                                         print(ratingValue['rating']);
                                         print(ratingValue['rated']);
 
-                                        if(ratingValue['rated'] == true)
-                                        {
-                                          Fluttertoast.showToast(msg: 'You have rated the product!');
+                                        if (ratingValue['rated'] == true) {
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  'You have rated the product!');
                                           updateRating(
                                             ratingValue['productID'],
                                             ratingValue['productImage'],
                                             ratingValue['productName'],
-                                            double.parse(ratingValue['productPrice']),
+                                            double.parse(
+                                                ratingValue['productPrice']),
                                             ratingValue['id'],
                                             int.parse(ratingValue['quantity']),
                                             ratingValue['received'],
                                             ratingValue['address'],
                                             ratingValue['rating'],
-                                            );
+                                          );
                                         }
                                       },
                                       child: Container(

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:coffeeproject/shared/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
@@ -24,7 +23,6 @@ class _ProfileState extends State<Profile> {
   final _validationkey = GlobalKey<FormState>();
   final AuthService _auth = AuthService();
   final _user = FirebaseAuth.instance;
-  bool loading = false;
 
   //initState and manualRefresh
   Map<String, dynamic>? data;
@@ -407,17 +405,14 @@ class _ProfileState extends State<Profile> {
       if (userCurrentImage != '') {
         FirebaseStorage.instance.refFromURL(userCurrentImage).delete();
         setState(() {
-          loading = true;
           userCurrentImage = '';
         });
         dynamic result = await _auth.userImageAdd(userCurrentImage);
 
         if (result == null) {
           Fluttertoast.showToast(msg: 'User image removed successfully.');
-          setState(() => loading = false);
         } else {
           Fluttertoast.showToast(msg: 'Something went wrong..');
-          setState(() => loading = false);
         }
       } else {
         Fluttertoast.showToast(msg: emptyImage);
@@ -446,7 +441,6 @@ class _ProfileState extends State<Profile> {
 
   //uploading image to firebase storage
   Future uploadFile(File _theImage) async {
-    setState(() => loading = true);
     var url;
     if (image == null) return;
 
@@ -463,11 +457,10 @@ class _ProfileState extends State<Profile> {
       }
 
       if (result == null) {
-        setState(() => loading = false);
         Fluttertoast.showToast(msg: 'Image added successfully');
         manualRefresh();
       } else {
-        setState(() => loading = false);
+
         Fluttertoast.showToast(msg: 'Image add error. Please try again.');
       }
     });
@@ -478,11 +471,9 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    setState(() => loading = true);
     _auth.userItemRead().then((value) {
       data = value.data();
       setState(() {
-        loading = false;
         // balance = data!['balance'];
         userCurrentImage = data!['image'];
         print('Initial read userImage done #initState #profile.dart');
@@ -492,12 +483,9 @@ class _ProfileState extends State<Profile> {
 
   //manual refresh
   void manualRefresh() {
-    setState(() => loading = true);
     _auth.userItemRead().then((value) {
       data = value.data();
       setState(() {
-        loading = false;
-        // balance = data!['balance'];
         userCurrentImage = data!['image'];
         print('Refresh userImage done #manualRefresh');
       });
@@ -506,302 +494,295 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return loading
-        ? Loading()
-        : SingleChildScrollView(
-            child: Container(
-                alignment: Alignment.bottomRight,
-                padding: EdgeInsets.all(25.0),
-                child: StreamBuilder<DocumentSnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('User')
-                        .doc(_user.currentUser!.uid)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return CircularProgressIndicator();
-                      }
+    return SingleChildScrollView(
+      child: Container(
+          alignment: Alignment.bottomRight,
+          padding: EdgeInsets.all(25.0),
+          child: StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('User')
+                  .doc(_user.currentUser!.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return CircularProgressIndicator();
+                }
 
-                      final DocumentSnapshot? userSnapshot = snapshot.data;
-                      final Map<String, dynamic> userMap =
-                          userSnapshot!.data() as Map<String, dynamic>;
+                final DocumentSnapshot? userSnapshot = snapshot.data;
+                final Map<String, dynamic> userMap =
+                    userSnapshot!.data() as Map<String, dynamic>;
 
-                      //address
-                      // final List<Map<String, dynamic>> addressList =
-                      //     (userMap['address'] as List)
-                      //         .map((e) => e as Map<String, dynamic>)
-                      //         .toList();
+                //address
+                // final List<Map<String, dynamic>> addressList =
+                //     (userMap['address'] as List)
+                //         .map((e) => e as Map<String, dynamic>)
+                //         .toList();
 
-                      return Column(
-                        children: [
-                          //top row
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 4,
-                                child: CircleAvatar(
-                                  radius: 55.0,
-                                  backgroundColor: Colors.green[300],
-                                  child: InkWell(
-                                    onTap: () {
-                                      _showPickedOptionsDialog(context);
-                                    },
-                                    child: CircleAvatar(
-                                      foregroundImage:
-                                          NetworkImage(userMap['image']),
-                                      radius: 50.0,
-                                      backgroundColor: Colors.white,
-                                      backgroundImage:
-                                          Image.asset('assets/useravatar.png')
-                                              .image,
-                                    ),
-                                  ),
-                                ),
+                return Column(
+                  children: [
+                    //top row
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: CircleAvatar(
+                            radius: 55.0,
+                            backgroundColor: Colors.green[300],
+                            child: InkWell(
+                              onTap: () {
+                                _showPickedOptionsDialog(context);
+                              },
+                              child: CircleAvatar(
+                                foregroundImage: NetworkImage(userMap['image']),
+                                radius: 50.0,
+                                backgroundColor: Colors.white,
+                                backgroundImage:
+                                    Image.asset('assets/useravatar.png').image,
                               ),
-                              SizedBox(width: 25.0),
-                              Expanded(
-                                flex: 6,
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Expanded(flex: 5, child: Text('Name:')),
-                                        Text('  '),
-                                        Expanded(
-                                            flex: 5,
-                                            child: Text(userMap['userName'])),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10.0),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Expanded(
-                                            flex: 5, child: Text('Balance:')),
-                                        Expanded(
-                                            flex: 5,
-                                            child: Text(
-                                                'RM ${userMap['balance']}')),
-                                      ],
-                                    ),
-                                    SizedBox(height: 15.0),
-                                    ElevatedButton.icon(
-                                        onPressed: () {
-                                          createReloadDialog(
-                                              context, userMap['balance']);
-                                        },
-                                        icon: Icon(Icons.money),
-                                        label: Text('Top up')),
-                                  ],
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                          SizedBox(height: 25.0),
-                          //middle row
-                          Column(
+                        ),
+                        SizedBox(width: 25.0),
+                        Expanded(
+                          flex: 6,
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Text(
-                                'Profile Details',
-                                style: TextStyle(
-                                  fontSize: 25.0,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Divider(height: 10.0, color: Colors.black),
-                              SizedBox(height: 5.0),
-                              Card(
-                                elevation: 10.0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: Icon(Icons.phone),
-                                      ),
-                                      SizedBox(width: 10.0),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text('Phone No:'),
-                                      ),
-                                      Expanded(
-                                        flex: 4,
-                                        child: Text(
-                                          userMap['phoneNo'].toString(),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: IconButton(
-                                          icon: Icon(Icons.edit),
-                                          onPressed: () {
-                                            createEditPhoneDialog(
-                                                context, userMap['phoneNo']);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(flex: 5, child: Text('Name:')),
+                                  Text('  '),
+                                  Expanded(
+                                      flex: 5,
+                                      child: Text(userMap['userName'])),
+                                ],
                               ),
                               SizedBox(height: 10.0),
-                              //street stuffs
-                              Card(
-                                elevation: 10.0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Row(children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Icon(Icons.edit_road),
-                                    ),
-                                    SizedBox(width: 10.0),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text('Street:'),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(userMap['street-name']),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: IconButton(
-                                        icon: Icon(Icons.edit),
-                                        onPressed: () {
-                                          createEditStreetDialog(
-                                              context, userMap['street-name']);
-                                        },
-                                      ),
-                                    ),
-                                  ]),
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(flex: 5, child: Text('Balance:')),
+                                  Expanded(
+                                      flex: 5,
+                                      child: Text('RM ${userMap['balance']}')),
+                                ],
                               ),
-                              SizedBox(height: 10.0),
-                              //city stuffs
-                              Card(
-                                elevation: 10.0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Row(children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Icon(Icons.location_city),
-                                    ),
-                                    SizedBox(width: 10.0),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text('City:'),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(userMap['city']),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: IconButton(
-                                        icon: Icon(Icons.edit),
-                                        onPressed: () {
-                                          createEditCityDialog(
-                                              context, userMap['city']);
-                                        },
-                                      ),
-                                    ),
-                                  ]),
-                                ),
-                              ),
-                              SizedBox(height: 10.0),
-                              //state stuffs
-                              Card(
-                                elevation: 10.0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Row(children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Icon(Icons.flag),
-                                    ),
-                                    SizedBox(width: 10.0),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text('State:'),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(userMap['state']),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: IconButton(
-                                        icon: Icon(Icons.edit),
-                                        onPressed: () {
-                                          createEditStateDialog(
-                                              context, userMap['state']);
-                                        },
-                                      ),
-                                    ),
-                                  ]),
-                                ),
-                              ),
-                              //postcode stuffs
-                              Card(
-                                elevation: 10.0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Row(children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Icon(Icons.local_post_office),
-                                    ),
-                                    SizedBox(width: 10.0),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text('Post Code:'),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(userMap['postcode'].toString()),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: IconButton(
-                                        icon: Icon(Icons.edit),
-                                        onPressed: () {
-                                          createEditPostCodeDialog(
-                                              context, userMap['postcode']);
-                                        },
-                                      ),
-                                    ),
-                                  ]),
-                                ),
-                              ),
+                              SizedBox(height: 15.0),
+                              ElevatedButton.icon(
+                                  onPressed: () {
+                                    createReloadDialog(
+                                        context, userMap['balance']);
+                                  },
+                                  icon: Icon(Icons.money),
+                                  label: Text('Top up')),
                             ],
                           ),
-                          SizedBox(height: 25.0),
-                          Text(
-                              'Current number of orders: ${userMap['orders'].toString()}'),
-                        ],
-                      );
-                    })),
-          );
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 25.0),
+                    //middle row
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Profile Details',
+                          style: TextStyle(
+                            fontSize: 25.0,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Divider(height: 10.0, color: Colors.black),
+                        SizedBox(height: 5.0),
+                        Card(
+                          elevation: 10.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Icon(Icons.phone),
+                                ),
+                                SizedBox(width: 10.0),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text('Phone No:'),
+                                ),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    userMap['phoneNo'].toString(),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: IconButton(
+                                    icon: Icon(Icons.edit),
+                                    onPressed: () {
+                                      createEditPhoneDialog(
+                                          context, userMap['phoneNo']);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        //street stuffs
+                        Card(
+                          elevation: 10.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(children: [
+                              Expanded(
+                                flex: 1,
+                                child: Icon(Icons.edit_road),
+                              ),
+                              SizedBox(width: 10.0),
+                              Expanded(
+                                flex: 4,
+                                child: Text('Street:'),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: Text(userMap['street-name']),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () {
+                                    createEditStreetDialog(
+                                        context, userMap['street-name']);
+                                  },
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        //city stuffs
+                        Card(
+                          elevation: 10.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(children: [
+                              Expanded(
+                                flex: 1,
+                                child: Icon(Icons.location_city),
+                              ),
+                              SizedBox(width: 10.0),
+                              Expanded(
+                                flex: 4,
+                                child: Text('City:'),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: Text(userMap['city']),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () {
+                                    createEditCityDialog(
+                                        context, userMap['city']);
+                                  },
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        //state stuffs
+                        Card(
+                          elevation: 10.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(children: [
+                              Expanded(
+                                flex: 1,
+                                child: Icon(Icons.flag),
+                              ),
+                              SizedBox(width: 10.0),
+                              Expanded(
+                                flex: 4,
+                                child: Text('State:'),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: Text(userMap['state']),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () {
+                                    createEditStateDialog(
+                                        context, userMap['state']);
+                                  },
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ),
+                        //postcode stuffs
+                        Card(
+                          elevation: 10.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(children: [
+                              Expanded(
+                                flex: 1,
+                                child: Icon(Icons.local_post_office),
+                              ),
+                              SizedBox(width: 10.0),
+                              Expanded(
+                                flex: 4,
+                                child: Text('Post Code:'),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: Text(userMap['postcode'].toString()),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () {
+                                    createEditPostCodeDialog(
+                                        context, userMap['postcode']);
+                                  },
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 25.0),
+                    Text(
+                        'Current number of orders: ${userMap['orders'].toString()}'),
+                  ],
+                );
+              })),
+    );
   }
 }

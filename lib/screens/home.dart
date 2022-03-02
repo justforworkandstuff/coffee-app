@@ -16,8 +16,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  // GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final AuthService _auth = AuthService();
+  // final BottomNavigationBar btmNavBar =
+  //     btmNavBarKey.currentWidget as BottomNavigationBar;
 
   int _selectedIndex = 0;
   List<Widget> _pageList = [
@@ -27,7 +28,7 @@ class _HomeState extends State<Home> {
     Wrapper(),
   ];
 
-  //bottom navigation bar items 
+  //bottom navigation bar items
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -40,7 +41,7 @@ class _HomeState extends State<Home> {
 
     return StreamProvider<CustomUser?>.value(
       initialData: null,
-      value: AuthService().streamUser,
+      value: _auth.streamUser,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Gigi Coffee'),
@@ -49,6 +50,7 @@ class _HomeState extends State<Home> {
               icon: Icon(Icons.logout),
               onPressed: () {
                 _auth.userSignOut();
+                // btmNavBar.onTap!(0);
               },
             )
           ],

@@ -4,7 +4,6 @@ import 'package:path/path.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:coffeeproject/shared/auth.dart';
 import 'package:coffeeproject/shared/constants.dart';
-import 'package:coffeeproject/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,7 +26,6 @@ class _SignInState extends State<SignIn> {
   TextEditingController _cityController = TextEditingController();
   TextEditingController _postCodeController = TextEditingController();
 
-  bool loading = false;
   String error = '';
   bool toggleSignIn = true;
   bool toggleRegister = false;
@@ -133,9 +131,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return loading
-        ? Loading()
-        : Scaffold(
+    return Scaffold(
             body: Padding(
               padding: const EdgeInsets.all(15.0),
               child: SingleChildScrollView(
@@ -381,20 +377,17 @@ class _SignInState extends State<SignIn> {
                             child: ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  setState(() => loading = true);
                                   dynamic result =
                                       await _auth.userSignIn(email, password);
                                   if (result == null) {
                                     setState(() {
                                       error = 'Please enter a valid email.';
-                                      loading = false;
                                     });
                                   } else {
                                     Fluttertoast.showToast(
                                       msg: 'Login succssfully.',
                                       gravity: ToastGravity.BOTTOM,
                                     );
-                                    setState(() => loading = false);
                                   }
                                 }
                               },
@@ -408,7 +401,6 @@ class _SignInState extends State<SignIn> {
                             child: ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  setState(() => loading = true);
                                   dynamic result = await _auth.userRegister(
                                       email,
                                       password,
@@ -425,10 +417,8 @@ class _SignInState extends State<SignIn> {
                                     setState(() {
                                       error =
                                           'Please enter a valid email./Email has already been used!';
-                                      loading = false;
                                     });
                                   } else {
-                                    setState(() => loading = false);
                                     Fluttertoast.showToast(
                                       msg: 'Register succssfully.',
                                       gravity: ToastGravity.BOTTOM,
