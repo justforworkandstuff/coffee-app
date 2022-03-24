@@ -381,7 +381,7 @@ class _SignInState extends State<SignIn> {
                                       await _auth.userSignIn(email, password);
                                   if (result == null) {
                                     setState(() {
-                                      error = 'Please enter a valid email.';
+                                      error = 'The email or password is incorrect.';
                                     });
                                   } else {
                                     Fluttertoast.showToast(
